@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`epic-location`
+Tracks changes to the address bar
+
+@demo demo/index.html 
+-->
+
+<dom-module id="epic-location">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'epic-location',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'epic-location',
+        },
+      },
+
+    });
+  </script>
+</dom-module>

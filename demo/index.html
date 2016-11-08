@@ -5,10 +5,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../custom-elements/src/custom-elements.js"></script>
+    <script src="../../custom-elements/src/native-shim.js"></script>
+    <script src="../jspm_packages/system.js"></script>
+    <script src="../jspm.config.js"></script>
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-
+    <!-- <script>
+        System.import('../src/epic-location.js');
+    </script> -->
     <link rel="import" href="../epic-location.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -20,7 +26,7 @@
       <h3>Basic epic-location Demo</h3>
       <demo-snippet>
         <template>
-          <epic-location></epic-location>
+          <epic-location popstate-changes hash-changes clicks></epic-location>
         </template>
       </demo-snippet>
     </div>

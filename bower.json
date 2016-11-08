@@ -1,9 +1,10 @@
 {
   "name": "epic-location",
-  "description": "Tracks changes to the address bar",
+  "description": "watches address bar for changes",
   "main": "epic-location.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.4.0"
+    "polymer": "Polymer/polymer#^1.4.0",
+    "lite-url": "^1.0.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

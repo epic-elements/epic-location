@@ -1,6 +1,6 @@
 # \<epic-location\>
 
-Tracks changes to the address bar
+watches address bar for changes
 
 ## Install the Polymer-CLI
 

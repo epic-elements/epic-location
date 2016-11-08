@@ -1,0 +1,164 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../polymer/polymer.html">
+
+<!--
+`epic-location`
+watches address bar for changes
+
+@demo demo/index.html
+-->
+
+<dom-module id="epic-location">
+  <template>
+    <h2>Hello [[prop1]]</h2>
+    <p>use-popstate: <span>[[usePopstate]]</span></p>
+    <p>use-hash: <span>[[useHash]]</span></p>
+    <p>use-clicks: <span>[[useClicks]]</span></p>
+    <p>protocol: <span>[[protocol]]</span></p>
+    <p>slashes: <span>[[slashes]]</span></p>
+    <p>auth: <span>[[auth]]</span></p>
+    <p>username: <span>[[username]]</span></p>
+    <p>password: <span>[[password]]</span></p>
+    <p>host: <span>[[host]]</span></p>
+    <p>hostname: <span>[[hostname]]</span></p>
+    <p>port: <span>[[port]]</span></p>
+    <p>pathname: <span>[[pathname]]</span></p>
+    <p>query: <span>[[query]]</span></p>
+    <p>hash: <span>[[hash]]</span></p>
+    <p>href: <span>[[href]]</span></p>
+    <p>origin: <span>[[origin]]</span></p>
+  </template>
+
+  <script>
+
+ // loads /js/main.js
+    System.import('/utils').then(function(module) {
+        let URL = module.URL;
+        Polymer({
+              is: 'epic-location',
+              properties: {
+                popstateChanges: {
+                    type: Boolean,
+                    observer: '_observePopstateChanged'
+                },
+                hashChanges: {
+                    type: Boolean,
+                    observer: '_observeHashChanged'
+                },
+                clicks: {
+                    type: Boolean,
+                    observer: '_observeClicksChanged'
+                },
+                protocol: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                slashes: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                auth: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                username: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                password: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                host: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                hostname: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                port: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                pathname: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                query: {
+                    type: Object,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                hash: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                href: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                },
+                origin: {
+                    type: String,
+                    reflectToAttribute: true,
+                    notify: true,
+                }
+            },
+            detached: function(){
+                this.unlisten(window, 'popstate', 'setLocation');
+                this.unlisten(window, 'hashchange', 'setLocation');
+                this.unlisten(this.ownerDocument, 'click', 'setLocation');
+            },
+            _observePopstateChanged: function(value){
+                if(value){
+                    this.listen(window, 'popstate', 'setLocation');
+                } else {
+                    this.unlisten(window, 'popstate', 'setLocation');
+                }
+            },
+            _observeHashChanged: function(value){
+                if(value){
+                    this.listen(window, 'hashchange', 'setLocation');
+                } else {
+                    this.unlisten(window, 'hashchange', 'setLocation');
+                }
+            },
+            _observeClicksChanged: function(value){
+                if(value){
+                    this.listen(this.ownerDocument, 'click', 'setLocation');
+                } else {
+                    this.unlisten(this.ownerDocument, 'click', 'setLocation');
+                }
+            },
+            setLocation: function(e) {
+                console.log(window.location.href);
+                this.location = new URL(window.location.href);
+                this.protocol = location.protocol;
+                this.slashes = location.slashes;
+                this.auth = location.auth;
+                this.username = location.username;
+                this.password = location.password;
+                this.host = location.host;
+                this.hostname = location.hostname;
+                this.port = location.port;
+                this.pathname = location.pathname;
+                this.query = location.query;
+                this.hash = location.hash;
+                this.href = location.href;
+                this.origin = location.origin;
+            }
+        });
+    });
+  </script>
+</dom-module>

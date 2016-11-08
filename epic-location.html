@@ -1,34 +1,89 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="lite-url.html">
 
 <!--
 `epic-location`
-Tracks changes to the address bar
+watches address bar for changes
 
-@demo demo/index.html 
+@demo demo/index.html
 -->
 
 <dom-module id="epic-location">
-  <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-    <h2>Hello [[prop1]]</h2>
-  </template>
-
-  <script>
+    <script>
     Polymer({
-
-      is: 'epic-location',
-
-      properties: {
-        prop1: {
-          type: String,
-          value: 'epic-location',
+        is: 'epic-location',
+        properties: {
+            popstateChanges: {
+                type: Boolean,
+                observer: '_observePopstateChanged'
+            },
+            hashChanges: {
+                type: Boolean,
+                observer: '_observeHashChanged'
+            },
+            clicks: {
+                type: Boolean,
+                observer: '_observeClicksChanged'
+            },
+            location: {
+                type: Object,
+                value: function() {
+                    return {};
+                },
+                notify: true
+            },
         },
-      },
+        observers:['_locationChanged(location.*)'],
+        attached: function() {
+            this._setLocation();
+        },
+        detached: function() {
+            window.removeEventListener('popstate', this._setLocation.bind(this));
+            window.removeEventListener('hashchange', this._setLocation.bind(this));
+            document.removeEventListener('click', this._setLocation.bind(this));
+        },
+        _observePopstateChanged: function(value){
+            if(value){
+                window.addEventListener('popstate', this._setLocation.bind(this));
+            } else {
+                window.removeEventListener('popstate', this._setLocation.bind(this));
+            }
+        },
+        _observeHashChanged: function(value){
+            if(value){
+                window.addEventListener('hashchange', this._setLocation.bind(this));
+            } else {
+                window.removeEventListener('hashchange', this._setLocation.bind(this));
+            }
+        },
+        _observeClicksChanged: function(value){
+            if(value){
+                document.addEventListener('click', this._setLocation.bind(this));
+            } else {
+                document.removeEventListener('click', this._setLocation.bind(this));
+            }
+        },
+        _setLocation: function(e) {
+            this.debounce('setLocation', function() {
+                let location = new URL(window.location.href);
+                this.set('location.hash', location.hash);
+                this.set('location.search', location.search);
+                this.set('location.pathname', location.pathname);
+                this.set('location.port', location.port);
+                this.set('location.hostname', location.hostname);
+                this.set('location.host', location.host);
+                this.set('location.password', location.password);
+                this.set('location.username', location.username);
+                this.set('location.protocol', location.protocol);
+                this.set('location.origin', location.origin);
+                this.set('location.href', location.href);
 
-    });
-  </script>
+            }, 100);
+        },
+
+        _locationChanged: function(value){
+            // console.log(value);
+        }
+      });
+    </script>
 </dom-module>

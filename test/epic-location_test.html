@@ -1,32 +1,61 @@
 <!doctype html>
 
 <html>
-  <head>
-    <title>epic-location test</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
 
-    <link rel="import" href="../epic-location.html">
-  </head>
-  <body>
+	<head>
+		<title>epic-location test</title>
+		<meta charset="utf-8">
+		<meta name="viewport"
+			content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+		<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+		<script src="../../web-component-tester/browser.js"></script>
 
-    <test-fixture id="basic">
-      <template>
-        <epic-location></epic-location>
-      </template>
-    </test-fixture>
+		<link rel="import"
+			href="../epic-location.html">
+	</head>
 
-    <script>
-      suite('epic-location', function() {
+	<body>
 
-        test('instantiating the element works', function() {
-          var element = fixture('basic');
-          assert.equal(element.is, 'epic-location');
-        });
+		<test-fixture id="basic">
+			<template>
+				<epic-location popstate-changes
+					hash-changes
+					clicks></epic-location>
+			</template>
+		</test-fixture>
+		<test-fixture id="basic">
+			<template>
+				<epic-location popstate-changes
+					hash-changes
+					clicks></epic-location>
+			</template>
+		</test-fixture>
 
-      });
-    </script>
-  </body>
+		<script>
+			suite('<epic-location>', function() {
+				var temp;
+				var element;
+				setup(function() {
+					temp = fixture('basic');
+					element = document.querySelector('#basic epic-location');
+				});
+				test('instantiating the element works', function() {
+					assert.equal(element.is, 'epic-location');
+				});
+			});
+
+			suite('<epic-location clicks>', function() {
+				var temp;
+				var element;
+				setup(function() {
+					temp = fixture('basic');
+					element = document.querySelector('#basic epic-location');
+				});
+				test('create a url object from the current url', function() {
+					assert.equal(element.is, 'epic-location');
+				});
+			});
+		</script>
+	</body>
+
 </html>

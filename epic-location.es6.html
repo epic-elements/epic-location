@@ -14,8 +14,6 @@ watches address bar for changes
 
 <dom-module id="epic-location">
 	<script>
-		'use strict';
-
 		Polymer({
 			is: 'epic-location',
 			properties: {
@@ -120,7 +118,7 @@ watches address bar for changes
 				segments: {
 					type: Array,
 					notify: true,
-					value: function value() {
+					value: function() {
 						return [];
 					}
 				},
@@ -138,36 +136,32 @@ watches address bar for changes
 					type: String,
 					notify: true,
 					value: ''
-				}
+				},
 			},
 			observers: [],
-			ready: function ready() {
-				var _this = this;
-
-				this.href$ = this._createPropertyStream('href').distinctUntilChanged();
-				this.url$ = this.href$.switchMap(function(v) {
-					return _this._createUrlStream().filter(function(v) {
-						return v;
-					}).distinctUntilChanged();
-				});
+			ready: function() {
+				this.href$ = this
+					._createPropertyStream('href')
+					.distinctUntilChanged();
+				this.url$ = this.href$
+					.switchMap(v => this
+						._createUrlStream()
+						.filter(v => v)
+						.distinctUntilChanged());
 			},
-			attached: function attached() {
-				var _this2 = this;
-
-				this.subscribedHref$ = this.href$.filter(function(v) {
-					return v;
-				}).distinctUntilChanged().subscribe(function(v) {
-					return _this2._setLocation(v);
-				});
-				this.subscribedUrl$ = this.url$.subscribe(function(v) {
-					return _this2.set('href', v);
-				});
+			attached: function() {
+				this.subscribedHref$ = this.href$
+					.filter(v => v)
+					.distinctUntilChanged()
+					.subscribe(v => this._setLocation(v));
+				this.subscribedUrl$ = this.url$
+					.subscribe(v => this.set('href', v));
 			},
-			detached: function detached() {
+			detached: function() {
 				this.subscribedUrl$.unsubscribe();
 				this.subscribedHref$.unsubscribe();
 			},
-			_setLocation: function _setLocation(href) {
+			_setLocation: function(href) {
 				this.debounce('setLocation', function() {
 					var uri = new URI(href);
 					this.set('hash', uri.hash());
@@ -193,52 +187,67 @@ watches address bar for changes
 					this.set('resource', uri.resource());
 				}, 100);
 			},
-			_createUrlStream: function _createUrlStream() {
-				return this._createEventStream().map(function(v) {
-					return window.location.href;
-				}).startWith(window.location.href).distinctUntilChanged();
+			_createUrlStream: function() {
+				return this
+					._createEventStream()
+					.map(v => window.location.href)
+					.startWith(window.location.href)
+					.distinctUntilChanged();
 			},
-			_createEventStream: function _createEventStream() {
-				var popstateChanges$ = this._createPropertyStream('popstateChanges').switchMap(function(v) {
-					if (v) {
-						return Rx.Observable.fromEvent(window, 'popstate');
-					} else {
-						return false;
-					}
-				}).filter(function(v) {
-					return v;
-				});
-				var hashChanges$ = this._createPropertyStream('hashChanges').switchMap(function(v) {
-					if (v) {
-						return Rx.Observable.fromEvent(window, 'hashchange');
-					} else {
-						return false;
-					}
-				}).filter(function(v) {
-					return v;
-				});
-				var clicks$ = this._createPropertyStream('clicks').switchMap(function(v) {
-					if (v) {
-						return Rx.Observable.fromEvent(document, 'click');
-					} else {
-						return false;
-					}
-				}).filter(function(v) {
-					return v;
-				});
+			_createEventStream: function() {
+				let popstateChanges$ = this.
+				_createPropertyStream('popstateChanges')
+					.switchMap(v => {
+						if (v) {
+							return Rx.Observable
+								.fromEvent(window, 'popstate')
+						} else {
+							return false;
+						}
+					})
+					.filter(v => v);
+				let hashChanges$ = this.
+				_createPropertyStream('hashChanges')
+					.switchMap(v => {
+						if (v) {
+							return Rx.Observable
+								.fromEvent(window, 'hashchange')
+						} else {
+							return false;
+						}
+					})
+					.filter(v => v);
+				let clicks$ = this.
+				_createPropertyStream('clicks')
+					.switchMap(v => {
+						if (v) {
+							return Rx.Observable
+								.fromEvent(document, 'click')
+						} else {
+							return false;
+						}
+					})
+					.filter(v => v);
 
-				return Rx.Observable.merge(popstateChanges$, hashChanges$, clicks$).filter(function(v) {
-					return v;
-				}).distinctUntilChanged();
+				return Rx.Observable
+					.merge(
+						popstateChanges$,
+						hashChanges$,
+						clicks$)
+					.filter(v => v)
+					.distinctUntilChanged();
 			},
-			_createPropertyStream: function _createPropertyStream(property) {
-				var currentProperty$ = Rx.Observable.of(this[property]);
-				var lpropertyChangeEvent$ = Rx.Observable.fromEvent(this, this._camel2dashed(property) + '-changed').map(function(e) {
-					return e.detail.value;
-				});
-				return Rx.Observable.merge(currentProperty$, lpropertyChangeEvent$).distinctUntilChanged();
+			_createPropertyStream: function(property) {
+				let currentProperty$ = Rx.Observable
+					.of(this[property]);
+				let lpropertyChangeEvent$ = Rx.Observable
+					.fromEvent(this, `${this._camel2dashed(property)}-changed`)
+					.map(e => e.detail.value);
+				return Rx.Observable
+					.merge(currentProperty$, lpropertyChangeEvent$)
+					.distinctUntilChanged();
 			},
-			_camel2dashed: function _camel2dashed(text) {
+			_camel2dashed: function(text) {
 				return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 			}
 		});

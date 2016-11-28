@@ -1,0 +1,88 @@
+<link rel="import" href="uri.html">
+<script>
+  Polymer.Epic.URLBehavior = {
+    properties: {
+      /** A URL string from which to generate the URL object */
+      href: {
+        type: String,
+        value: window.location.href,
+        notify: true
+      },
+      /** A URL string from which to generate the URL object */
+      protocol: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /** A URL string from which to generate the URL object */
+      host: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      hostname: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      port: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      pathname: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      search: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      hash: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      username: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      /**  */
+      password: {
+        type: String,
+        value: '',
+        notify: true
+      },
+      authority,
+      userinfo,
+      subdomain,
+      domain,
+
+      /**  */
+      origin: {
+        type: String,
+        value: '',
+        notify: true,
+        readOnly: true
+      },
+      /**  */
+      searchParams: {
+        type: String,
+        value: '',
+        notify: true
+      },
+    },
+    URL: function(url) {
+      return new URI("http://example.org/foo?bar=baz");
+    }
+  };
+</script>

@@ -6,7 +6,8 @@
     "polymer": "Polymer/polymer#^1.4.0",
     "lite-url": "^1.0.4",
     "url-pattern": "~1.0.1",
-    "urijs": "uri.js#~1.18.3"
+    "urijs": "uri.js#~1.18.3",
+    "epic-observable": "epic-elements/epic-observable"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

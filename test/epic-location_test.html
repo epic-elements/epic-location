@@ -55,6 +55,16 @@
 					assert.equal(element.is, 'epic-location');
 				});
 			});
+
+			suite('<epic-location> url overide', function() {
+				var temp;
+				var element;
+				setup(function() {
+					temp = fixture('basic');
+					element = document.querySelector('#basic epic-location');
+				});
+				test('href property should match url attribute');
+			});
 		</script>
 	</body>
 

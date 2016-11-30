@@ -20,17 +20,26 @@ watches address bar for changes
 			is: 'epic-location',
 			properties: {
 				popstateChanges: {
-					type: Boolean
+					type: Boolean,
+					notify: true
 				},
 				hashChanges: {
-					type: Boolean
+					type: Boolean,
+					notify: true
 				},
 				clicks: {
-					type: Boolean
+					type: Boolean,
+					notify: true
+				},
+				url: {
+					type: String,
+					notify: true,
+					value: ''
 				},
 				href: {
 					type: String,
-					notify: true
+					notify: true,
+					value: ''
 				},
 				hash: {
 					type: String,
@@ -144,8 +153,11 @@ watches address bar for changes
 			ready: function ready() {
 				var _this = this;
 
-				this.href$ = this._createPropertyStream('href').distinctUntilChanged();
-				this.url$ = this.href$.switchMap(function(v) {
+				this.href$ = this._createPropertyStream('href').filter(function(v) {
+					return v;
+				}).distinctUntilChanged();
+				this.events$ = this._createEventStream();
+				this.url$ = this.events$.switchMap(function(v) {
 					return _this._createUrlStream().filter(function(v) {
 						return v;
 					}).distinctUntilChanged();
@@ -194,8 +206,12 @@ watches address bar for changes
 				}, 100);
 			},
 			_createUrlStream: function _createUrlStream() {
-				return this._createEventStream().map(function(v) {
-					return window.location.href;
+				return this._createPropertyStream('url').map(function(url) {
+					if (!url) {
+						return window.location.href;
+					} else {
+						return url;
+					}
 				}).startWith(window.location.href).distinctUntilChanged();
 			},
 			_createEventStream: function _createEventStream() {
@@ -227,9 +243,7 @@ watches address bar for changes
 					return v;
 				});
 
-				return Rx.Observable.merge(popstateChanges$, hashChanges$, clicks$).filter(function(v) {
-					return v;
-				}).distinctUntilChanged();
+				return Rx.Observable.merge(popstateChanges$, hashChanges$, clicks$).startWith('').distinctUntilChanged();
 			},
 			_createPropertyStream: function _createPropertyStream(property) {
 				var currentProperty$ = Rx.Observable.of(this[property]);

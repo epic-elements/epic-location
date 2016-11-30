@@ -18,17 +18,26 @@ watches address bar for changes
 			is: 'epic-location',
 			properties: {
 				popstateChanges: {
-					type: Boolean
+					type: Boolean,
+					notify: true
 				},
 				hashChanges: {
-					type: Boolean
+					type: Boolean,
+					notify: true
 				},
 				clicks: {
-					type: Boolean
+					type: Boolean,
+					notify: true
+				},
+				url: {
+					type: String,
+					notify: true,
+					value: ''
 				},
 				href: {
 					type: String,
-					notify: true
+					notify: true,
+					value: ''
 				},
 				hash: {
 					type: String,
@@ -142,8 +151,11 @@ watches address bar for changes
 			ready: function() {
 				this.href$ = this
 					._createPropertyStream('href')
-					.distinctUntilChanged();
-				this.url$ = this.href$
+					.filter(v => v)
+					.distinctUntilChanged()
+				this.events$ = this
+					._createEventStream();
+				this.url$ = this.events$
 					.switchMap(v => this
 						._createUrlStream()
 						.filter(v => v)
@@ -189,8 +201,14 @@ watches address bar for changes
 			},
 			_createUrlStream: function() {
 				return this
-					._createEventStream()
-					.map(v => window.location.href)
+					._createPropertyStream('url')
+					.map(url => {
+						if (!url) {
+							return window.location.href
+						} else {
+							return url
+						}
+					})
 					.startWith(window.location.href)
 					.distinctUntilChanged();
 			},
@@ -234,7 +252,7 @@ watches address bar for changes
 						popstateChanges$,
 						hashChanges$,
 						clicks$)
-					.filter(v => v)
+					.startWith('')
 					.distinctUntilChanged();
 			},
 			_createPropertyStream: function(property) {

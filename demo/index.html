@@ -25,6 +25,8 @@
 			<h3>Basic epic-location Demo</h3>
 			<demo-snippet>
 				<template is="dom-bind">
+					<p>queryParams: [[queryParams]]</p>
+					<p>route: [[route.path]]</p>
 					<p>href: [[href]]</p>
 					<p>hash: [[hash]]</p>
 					<p>search: [[search]]</p>
@@ -50,6 +52,9 @@
 					<epic-location popstate-changes
 						hash-changes
 						clicks
+						url="https://www.zealoptics.com/en/goggle-tech"
+						query-params="{{queryParams}}"
+						route="{{route}}"
 						href="{{href}}"
 						hash="{{hash}}"
 						search="{{search}}"

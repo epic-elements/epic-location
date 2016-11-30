@@ -1,9 +1,15 @@
 <link rel="import"
 	href="../polymer/polymer.html">
 <link rel="import"
+	href="../epic-polyfills/babel-polyfill.html">
+<link rel="import"
 	href="uri.html">
 <link rel="import"
 	href="../epic-observable/rx.html">
+<link rel="import"
+	href="../app-route/app-route-converter.html">
+<link rel="import"
+	href="../iron-location/iron-query-params.html">
 
 <!--
 `epic-location`
@@ -13,6 +19,15 @@ watches address bar for changes
 -->
 
 <dom-module id="epic-location">
+	<template>
+		<iron-query-params params-string="[[query]]"
+			params-object="{{_queryParams}}">
+		</iron-query-params>
+		<app-route-converter path="[[pathname]]"
+			query-params="[[queryParams]]"
+			route="{{_route}}">
+		</app-route-converter>
+	</template>
 	<script>
 		'use strict';
 
@@ -147,9 +162,23 @@ watches address bar for changes
 					type: String,
 					notify: true,
 					value: ''
+				},
+				queryParams: {
+					type: Object,
+					notify: true,
+					value: function value() {
+						return {};
+					}
+				},
+				route: {
+					type: Object,
+					notify: true,
+					value: function value() {
+						return {};
+					}
 				}
 			},
-			observers: [],
+			observers: ['_computeQueryParams(_queryParams, _queryParams.*)', '_computedRoute(_route, _route.*)'],
 			ready: function ready() {
 				var _this = this;
 
@@ -178,6 +207,12 @@ watches address bar for changes
 			detached: function detached() {
 				this.subscribedUrl$.unsubscribe();
 				this.subscribedHref$.unsubscribe();
+			},
+			_computeQueryParams: function _computeQueryParams(_queryParams, change) {
+				this.set(change.path.replace("_", ''), change.value);
+			},
+			_computedRoute: function _computedRoute(_route, change) {
+				this.set(change.path.replace("_", ''), change.value);
 			},
 			_setLocation: function _setLocation(href) {
 				this.debounce('setLocation', function() {

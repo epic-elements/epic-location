@@ -7,7 +7,10 @@
     "lite-url": "^1.0.4",
     "url-pattern": "~1.0.1",
     "urijs": "uri.js#~1.18.3",
-    "epic-observable": "epic-elements/epic-observable"
+    "epic-observable": "epic-elements/epic-observable",
+    "epic-polyfills": "epic-elements/epic-polyfills",
+    "app-route": "PolymerElements/app-route#~0.9.3",
+    "iron-location": "polymerelements/iron-location#~0.8.9"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

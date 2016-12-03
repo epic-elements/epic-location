@@ -51,6 +51,10 @@
 				test('ignoreClicks is false by default', function() {
 					expect(element.ignoreClicks).to.be.false;
 				});
+				test('urlOverride is an empty string by default', function() {
+					expect(element.urlOverride).to.be.a('string')
+						.and.to.be.empty;
+				});
 
 			});
 			// 	test('lifecycle$ property exists', function() {

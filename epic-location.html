@@ -20,10 +20,12 @@ watches address bar for changes
 
 <dom-module id="epic-location">
 	<template>
-		<iron-query-params params-string="[[query]]"
+		<iron-query-params id="ironQueryParams"
+			params-string="[[query]]"
 			params-object="{{_queryParams}}">
 		</iron-query-params>
-		<app-route-converter path="[[pathname]]"
+		<app-route-converter id="appRouteConverter"
+			path="[[pathname]]"
 			query-params="[[queryParams]]"
 			route="{{_route}}">
 		</app-route-converter>
@@ -178,6 +180,10 @@ watches address bar for changes
 					}
 				}
 			},
+
+
+
+
 			observers: ['_computeQueryParams(_queryParams, _queryParams.*)', '_computedRoute(_route, _route.*)'],
 			ready: function ready() {
 				var _this = this;

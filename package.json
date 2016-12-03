@@ -17,6 +17,7 @@
     "assert": "github:jspm/nodelibs-assert@^0.2.0-alpha",
     "bcrypt-pbkdf": "^1.0.0",
     "buffer": "github:jspm/nodelibs-buffer@^0.2.0-alpha",
+    "chai-rx": "0.0.2",
     "child_process": "github:jspm/nodelibs-child_process@^0.2.0-alpha",
     "cluster": "github:jspm/nodelibs-cluster@^0.2.0-alpha",
     "console": "github:jspm/nodelibs-console@^0.2.0-alpha",

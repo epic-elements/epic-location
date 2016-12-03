@@ -4,12 +4,14 @@
 	href="../epic-polyfills/babel-polyfill.html">
 <link rel="import"
 	href="uri.html">
-<link rel="import"
-	href="../epic-observable/rx.html">
+<!-- <link rel="import"
+	href="../epic-observable/rx.html"> -->
 <link rel="import"
 	href="../app-route/app-route-converter.html">
 <link rel="import"
 	href="../iron-location/iron-query-params.html">
+<!-- <link rel="import"
+	href="../epic-stream/epic-stream-behavior.html"> -->
 
 <!--
 `epic-location`
@@ -20,292 +22,168 @@ watches address bar for changes
 
 <dom-module id="epic-location">
 	<template>
-		<iron-query-params params-string="[[query]]"
+		<!-- <iron-query-params id="ironQueryParams"
+			params-string="[[query]]"
 			params-object="{{_queryParams}}">
 		</iron-query-params>
-		<app-route-converter path="[[pathname]]"
+		<app-route-converter id="appRouteConverter"
+			path="[[pathname]]"
 			query-params="[[queryParams]]"
 			route="{{_route}}">
-		</app-route-converter>
+		</app-route-converter> -->
 	</template>
 	<script>
 		Polymer({
 			is: 'epic-location',
+			// behaviors: [Polymer.Epic.StreamBehavior],
 			properties: {
-				popstateChanges: {
+				ignorepopstates: {
+					type: Boolean,
+					value: false,
+					notify: true
+				},
+				observeHashChanges: {
+					type: Boolean,
+					value: false,
+					notify: true
+				},
+				observeClicks: {
 					type: Boolean,
 					notify: true
 				},
-				hashChanges: {
-					type: Boolean,
-					notify: true
-				},
-				clicks: {
-					type: Boolean,
-					notify: true
-				},
-				url: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				href: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				hash: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				search: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				pathname: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				port: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				hostname: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				host: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				password: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				username: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				protocol: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				origin: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				userinfo: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				authority: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				domain: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				subdomain: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				tld: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				directory: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				filename: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				segments: {
-					type: Array,
-					notify: true,
-					value: function() {
-						return [];
-					}
-				},
-				query: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				fragment: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				resource: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				queryParams: {
-					type: Object,
-					notify: true,
-					value: function() {
-						return {};
-					}
-				},
-				route: {
-					type: Object,
-					notify: true,
-					value: function() {
-						return {};
-					}
-				},
-			},
-			observers: [
-				'_computeQueryParams(_queryParams, _queryParams.*)',
-				'_computedRoute(_route, _route.*)'
-			],
-			ready: function() {
-				this.href$ = this
-					._createPropertyStream('href')
-					.filter(v => v)
-					.distinctUntilChanged()
-				this.events$ = this
-					._createEventStream();
-				this.url$ = this.events$
-					.switchMap(v => this
-						._createUrlStream()
-						.filter(v => v)
-						.distinctUntilChanged());
+				// lifecycle$: {
+				// 	type: Object,
+				// 	value: function() {
+				// 		return new Rx.ReplaySubject();
+				// 	},
+				// 	notify: true,
+				// 	readOnly: true
+				// },
+				// readyLifecycle$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createReadyLifecycleStream(lifecycle$)',
+				// 	readOnly: true
+				// },
+				// attachedLifecycle$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createAttachedLifecycleStream(lifecycle$)',
+				// 	readOnly: true
+				// },
+				// detachedLifecycle$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createDetachedLifecycleStream(lifecycle$)',
+				// 	readOnly: true
+				// },
+				// observePopstates$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createObservePopstatesStream(readyLifecycle$)',
+				// 	readOnly: true
+				// },
+				// observeHashChanges$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createObserveHashChanges(readyLifecycle$)',
+				// 	readOnly: true
+				// },
+				// observeClicks$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createObserveClicks(readyLifecycle$)',
+				// 	readOnly: true
+				// },
+				// popstates$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createPopstateStream(attachedLifecycle$, observePopstates$)',
+				// 	readOnly: true
+				// },
+				// hashChanges$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createHashChangeStream(attachedLifecycle$, observeHashChanges$)',
+				// 	readOnly: true
+				// },
+				// clicks$: {
+				// 	type: Object,
+				// 	notify: true,
+				// 	computed: '_createClickStream(attachedLifecycle$, observeClicks$)',
+				// 	readOnly: true
+				// },
 			},
 			attached: function() {
-				this.subscribedHref$ = this.href$
-					.filter(v => v)
-					.distinctUntilChanged()
-					.subscribe(v => this._setLocation(v));
-				this.subscribedUrl$ = this.url$
-					.subscribe(v => this.set('href', v));
+				// var properties$ = this._createStreamFromPropertyChanges();
+				// properties$.addListener({
+				// 	next: i => console.log(i),
+				// 	error: err => console.error(err),
+				// 	complete: () => console.log('completed')
+				// })
+
+				// this.set('observePopstates', true);
+				// this.set('observePopstates', true);
+				// this.set('observePopstates', false);
+				// this.set('observeHashChanges', true);
+				// this.set('observeHashChanges', true);
+				// this.set('observeHashChanges', false);
+				// this.set('observeClicks', true);
+				// this.set('observeClicks', true);
+				// this.set('observeClicks', false);
 			},
 			detached: function() {
-				this.subscribedUrl$.unsubscribe();
-				this.subscribedHref$.unsubscribe();
+				// this.lifecycle$.next('detached');
 			},
-			_computeQueryParams: function(_queryParams, change) {
-				this.set(change.path.replace("_", ''), change.value);
-			},
-			_computedRoute: function(_route, change) {
-				this.set(change.path.replace("_", ''), change.value);
-			},
-			_setLocation: function(href) {
-				this.debounce('setLocation', function() {
-					var uri = new URI(href);
-					this.set('hash', uri.hash());
-					this.set('search', uri.search());
-					this.set('pathname', uri.pathname());
-					this.set('port', uri.port());
-					this.set('hostname', uri.hostname());
-					this.set('host', uri.host());
-					this.set('password', uri.password());
-					this.set('username', uri.username());
-					this.set('protocol', uri.protocol());
-					this.set('origin', uri.origin());
-					this.set('userinfo', uri.userinfo());
-					this.set('authority', uri.authority());
-					this.set('domain', uri.domain());
-					this.set('subdomain', uri.subdomain());
-					this.set('tld', uri.tld());
-					this.set('directory', uri.directory());
-					this.set('filename', uri.filename());
-					this.set('segments', uri.segment());
-					this.set('query', uri.query());
-					this.set('fragment', uri.fragment());
-					this.set('resource', uri.resource());
-				}, 100);
-			},
-			_createUrlStream: function() {
-				return this
-					._createPropertyStream('url')
-					.map(url => {
-						if (!url) {
-							return window.location.href
-						} else {
-							return url
-						}
-					})
-					.startWith(window.location.href)
-					.distinctUntilChanged();
-			},
-			_createEventStream: function() {
-				let popstateChanges$ = this.
-				_createPropertyStream('popstateChanges')
-					.switchMap(v => {
-						if (v) {
-							return Rx.Observable
-								.fromEvent(window, 'popstate')
-						} else {
-							return false;
-						}
-					})
-					.filter(v => v);
-				let hashChanges$ = this.
-				_createPropertyStream('hashChanges')
-					.switchMap(v => {
-						if (v) {
-							return Rx.Observable
-								.fromEvent(window, 'hashchange')
-						} else {
-							return false;
-						}
-					})
-					.filter(v => v);
-				let clicks$ = this.
-				_createPropertyStream('clicks')
-					.switchMap(v => {
-						if (v) {
-							return Rx.Observable
-								.fromEvent(document, 'click')
-						} else {
-							return false;
-						}
-					})
-					.filter(v => v);
+			// _createReadyLifecycleStream: function(lifecycle$) {
+			// 	return lifecycle$
+			// 		.filter(v => v === 'ready')
+			// },
+			// _createAttachedLifecycleStream: function(lifecycle$) {
+			// 	return lifecycle$
+			// 		.filter(v => v === 'attached')
+			// },
+			// _createDetachedLifecycleStream: function(lifecycle$) {
+			// 	return lifecycle$
+			// 		.filter(v => v === 'detached')
+			// },
+			// _createObservePopstatesStream: function(readyLifecycle$) {
+			// 	return this
+			// 		._createPropertyStream('observePopstates')
+			// 		.filter(v => v)
+			// 		.skipUntil(readyLifecycle$);
+			// },
+			// _createObserveHashChangeStream: function(readyLifecycle$) {
+			// 	return this
+			// 		._createPropertyStream('observeHashChanges')
+			// 		.filter(v => v)
+			// 		.skipUntil(readyLifecycle$);
+			// },
+			// _createObserveClickStream: function(readyLifecycle$) {
+			// 	return this
+			// 		._createPropertyStream('observeClicks')
+			// 		.filter(v => v)
+			// 		.skipUntil(readyLifecycle$);
+			// },
+			// _createPopstateStream: function(attachedLifecycle$, observePopstates$) {
+			// 	return observePopstates$
+			// 		.switch(Rx.Observable
+			// 			.fromEvent(window, 'popstate'))
+			// 		.skipUntil(attachedLifecycle$);
+			// },
+			// _createHashChangeStream: function(attachedLifecycle$, observeHashChanges$) {
+			// 	return observePopstates$
+			// 		.switch(Rx.Observable
+			// 			.fromEvent(window, 'hashchange'))
+			// 		.skipUntil(attachedLifecycle$);
+			// },
+			// _createClickStream: function(attachedLifecycle$, observeClicks$) {
+			// 	return observePopstates$
+			// 		.switch(Rx.Observable
+			// 			.fromEvent(document, 'click'))
+			// 		.skipUntil(attachedLifecycle$);
+			// },
 
-				return Rx.Observable
-					.merge(
-						popstateChanges$,
-						hashChanges$,
-						clicks$)
-					.startWith('')
-					.distinctUntilChanged();
-			},
-			_createPropertyStream: function(property) {
-				let currentProperty$ = Rx.Observable
-					.of(this[property]);
-				let lpropertyChangeEvent$ = Rx.Observable
-					.fromEvent(this, `${this._camel2dashed(property)}-changed`)
-					.map(e => e.detail.value);
-				return Rx.Observable
-					.merge(currentProperty$, lpropertyChangeEvent$)
-					.distinctUntilChanged();
-			},
-			_camel2dashed: function(text) {
-				return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-			}
-		});
+		})
 	</script>
 </dom-module>

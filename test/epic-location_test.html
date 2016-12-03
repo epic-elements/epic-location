@@ -11,21 +11,17 @@
 		<script src="../../web-component-tester/browser.js"></script>
 
 		<link rel="import"
-			href="../epic-location.html">
+			href="../epic-location.es6.html">
+		<link rel="import"
+			href="../../epic-observable/rx.html">
 	</head>
 
 	<body>
 
 		<test-fixture id="basic">
 			<template>
-				<epic-location popstate-changes
-					hash-changes
-					clicks></epic-location>
-			</template>
-		</test-fixture>
-		<test-fixture id="basic">
-			<template>
-				<epic-location popstate-changes
+				<epic-location id="epicLocation"
+					popstate-changes
 					hash-changes
 					clicks></epic-location>
 			</template>
@@ -35,36 +31,78 @@
 			suite('<epic-location>', function() {
 				var temp;
 				var element;
+				var scheduler;
 				setup(function() {
 					temp = fixture('basic');
-					element = document.querySelector('#basic epic-location');
+					element = document.querySelector('#basic #epicLocation');
+					scheduler = new Rx.TestScheduler(function(actual, expected) {
+						expect(actual).to.deep.equal(expected);
+					});
 				});
 				test('instantiating the element works', function() {
-					assert.equal(element.is, 'epic-location');
+					expect(element.is).to.be.equal('epic-location');
 				});
 			});
-
-			suite('<epic-location clicks>', function() {
-				var temp;
-				var element;
-				setup(function() {
-					temp = fixture('basic');
-					element = document.querySelector('#basic epic-location');
-				});
-				test('create a url object from the current url', function() {
-					assert.equal(element.is, 'epic-location');
-				});
-			});
-
-			suite('<epic-location> url overide', function() {
-				var temp;
-				var element;
-				setup(function() {
-					temp = fixture('basic');
-					element = document.querySelector('#basic epic-location');
-				});
-				test('href property should match url attribute');
-			});
+			// 	test('lifecycle$ property exists', function() {
+			// 		expect(element.lifecycle$).to.be.an.instanceof(Rx.ReplaySubject);
+			// 	});
+			// 	test('lifecycle$ should emit null as first value', function() {
+			// 		var source$ = Rx.Observable
+			// 			.zip(element.lifecycle$,
+			// 				Rx.Observable.timer(50, 20, scheduler),
+			// 				function(item, i) {
+			// 					return item;
+			// 				})
+			// 			.do(v => console.log(v))
+			// 		scheduler
+			// 			.expectObservable(source$.take(2))
+			// 			.toBe('-----r-(a|)', {
+			// 				r: 'ready',
+			// 				a: 'attached'
+			// 			});
+			// 		scheduler.flush();
+			// 	});
+			// 	test('readyLifecycle$ property exists', function() {
+			// 		expect(element.readyLifecycle$).to.be.an.instanceof(Rx.AnonymousSubject);
+			// 	});
+			// 	test('readyLifecycle$ emits only `ready` values', function() {
+			// 		var source$ = element.readyLifecycle$;
+			// 		console.log(source$);
+			// 		var timer$ = Rx.Observable
+			// 			.zip(source$,
+			// 				Rx.Observable.timer(50, 20, scheduler),
+			// 				function(item, i) {
+			// 					return item;
+			// 				})
+			// 			.do(v => console.log(v))
+			// 		scheduler
+			// 			.expectObservable(timer$)
+			// 			.toBe('-----r--', {
+			// 				r: 'ready'
+			// 			});
+			// 		scheduler.flush();
+			// 	});
+			// 	test('attachedLifecycle$ property exists', function() {
+			// 		expect(element.attachedLifecycle$).to.be.an.instanceof(Rx.AnonymousSubject);
+			// 	});
+			// 	test('attachedLifecycle$ emits only `attached` values', function() {
+			// 		var source$ = element.attachedLifecycle$;
+			// 		console.log(source$);
+			// 		var timer$ = Rx.Observable
+			// 			.zip(source$,
+			// 				Rx.Observable.timer(50, 20, scheduler),
+			// 				function(item, i) {
+			// 					return item;
+			// 				})
+			// 			.do(v => console.log(v))
+			// 		scheduler
+			// 			.expectObservable(timer$)
+			// 			.toBe('-----a--', {
+			// 				a: 'attached'
+			// 			});
+			// 		scheduler.flush();
+			// 	});
+			// });
 		</script>
 	</body>
 

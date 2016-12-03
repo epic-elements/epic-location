@@ -37,18 +37,19 @@ watches address bar for changes
 			is: 'epic-location',
 			// behaviors: [Polymer.Epic.StreamBehavior],
 			properties: {
-				ignorepopstates: {
+				ignorePopstate: {
 					type: Boolean,
 					value: false,
 					notify: true
 				},
-				observeHashChanges: {
+				ignoreHash: {
 					type: Boolean,
 					value: false,
 					notify: true
 				},
-				observeClicks: {
+				ignoreClicks: {
 					type: Boolean,
+					value: false,
 					notify: true
 				},
 				// lifecycle$: {

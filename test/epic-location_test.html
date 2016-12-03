@@ -20,10 +20,7 @@
 
 		<test-fixture id="basic">
 			<template>
-				<epic-location id="epicLocation"
-					popstate-changes
-					hash-changes
-					clicks></epic-location>
+				<epic-location id="epicLocation"></epic-location>
 			</template>
 		</test-fixture>
 
@@ -42,6 +39,19 @@
 				test('instantiating the element works', function() {
 					expect(element.is).to.be.equal('epic-location');
 				});
+				test('instantiating the element works', function() {
+					expect(element.is).to.be.equal('epic-location');
+				});
+				test('ignorePopstate is false by default', function() {
+					expect(element.ignorePopstate).to.be.false;
+				});
+				test('ignoreHash is false by default', function() {
+					expect(element.ignoreHash).to.be.false;
+				});
+				test('ignoreClicks is false by default', function() {
+					expect(element.ignoreClicks).to.be.false;
+				});
+
 			});
 			// 	test('lifecycle$ property exists', function() {
 			// 		expect(element.lifecycle$).to.be.an.instanceof(Rx.ReplaySubject);

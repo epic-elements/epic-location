@@ -4,14 +4,14 @@
 	href="../epic-polyfills/babel-polyfill.html">
 <link rel="import"
 	href="uri.html">
-<!-- <link rel="import"
-	href="../epic-observable/rx.html"> -->
 <link rel="import"
 	href="../app-route/app-route-converter.html">
 <link rel="import"
 	href="../iron-location/iron-query-params.html">
-<!-- <link rel="import"
-	href="../epic-stream/epic-stream-behavior.html"> -->
+<link rel="import"
+	href="../epic-stream/src/epic-stream-behavior.html">
+<link rel="import"
+	href="../epic-stream/src/xstream.html">
 
 <!--
 `epic-location`
@@ -35,7 +35,7 @@ watches address bar for changes
 	<script>
 		Polymer({
 			is: 'epic-location',
-			// behaviors: [Polymer.Epic.StreamBehavior],
+			behaviors: [Polymer.Epic.StreamBehavior],
 			properties: {
 				ignorePopstate: {
 					type: Boolean,
@@ -56,6 +56,12 @@ watches address bar for changes
 					type: String,
 					value: '',
 					notify: true
+				},
+				hostname: {
+					type: String,
+					value: '',
+					notify: true,
+					readOnly: true
 				}
 				// lifecycle$: {
 				// 	type: Object,
@@ -120,13 +126,38 @@ watches address bar for changes
 				// 	readOnly: true
 				// },
 			},
+			ready: function() {
+				// var properties$ = this._createStreamFromProperies();
+				var lifecycle$ = this._createStreamFromLifecycleChanges();
+				var attached$ = lifecycle$.filter(v => v === 'attached');
+				var detached$ = lifecycle$.filter(v => v === 'detached');
+				var url$ = xs.of(window.location.href)
+				var urlObj$ = url$.map(href => new URI(href));
+				var hostname$ = urlObj$.map(url => url.hostname());
+				var domain$ = urlObj$.map(url => url.domain());
+
+				var state$ = attached$.map(v => xs
+						.combine(hostname$)
+						.map(([hostname]) => Object.assign({}, {
+							hostname
+						}))
+						.debug(x => x)
+						.endWhen(detached$))
+					.compose(xs.flattenConcurrently);
+
+				var updateHostname$ = state$
+					.map(state => state.hostname)
+					.compose(xs.dropRepeats());
+				updateHostname$.addListener({
+					next: v => this._setHostname(v),
+					error: err => console.error(err),
+					complete: () => console.log('completed')
+				})
+
+			},
 			attached: function() {
-				// var properties$ = this._createStreamFromPropertyChanges();
-				// properties$.addListener({
-				// 	next: i => console.log(i),
-				// 	error: err => console.error(err),
-				// 	complete: () => console.log('completed')
-				// })
+
+
 
 				// this.set('observePopstates', true);
 				// this.set('observePopstates', true);

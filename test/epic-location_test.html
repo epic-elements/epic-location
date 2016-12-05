@@ -20,43 +20,181 @@
 
 		<test-fixture id="basic">
 			<template>
-				<epic-location id="epicLocation"></epic-location>
+				<epic-location></epic-location>
 			</template>
 		</test-fixture>
 
 		<script>
+			/**
+			 * Story: element binds to current route
+			 *
+			 * As an element
+			 */
+
 			suite('<epic-location>', function() {
-				var temp;
 				var element;
-				var scheduler;
+
 				setup(function() {
-					temp = fixture('basic');
-					element = document.querySelector('#basic #epicLocation');
-					scheduler = new Rx.TestScheduler(function(actual, expected) {
-						expect(actual).to.deep.equal(expected);
-					});
-				});
-				test('instantiating the element works', function() {
-					expect(element.is).to.be.equal('epic-location');
-				});
-				test('instantiating the element works', function() {
-					expect(element.is).to.be.equal('epic-location');
-				});
-				test('ignorePopstate is false by default', function() {
-					expect(element.ignorePopstate).to.be.false;
-				});
-				test('ignoreHash is false by default', function() {
-					expect(element.ignoreHash).to.be.false;
-				});
-				test('ignoreClicks is false by default', function() {
-					expect(element.ignoreClicks).to.be.false;
-				});
-				test('urlOverride is an empty string by default', function() {
-					expect(element.urlOverride).to.be.a('string')
-						.and.to.be.empty;
+					element = fixture('basic');
 				});
 
+				test('instantiating the element works', function() {
+					expect(element.is).to.be.equal('epic-location');
+				});
+
+				test('default hostname matches current location hostname', function() {
+					expect(element.hostname).to.be.equal(window.location.hostname)
+				});
 			});
+
+			// read the initial/current url location
+			// watches for url location changes
+			// current location can be overridden
+
+			// creates url object from location
+			// updates url object when location changes
+			// overrides url object if an override url is provided
+
+			// creates a route object compatible with app-route from location
+			// updates route object when url changes
+			// overrides route object if an override url is provided
+
+
+
+
+
+			// suite('Watching for location Changes')
+			// suite('Watching for location Changes')
+			// suite('ignoring changes')
+			// suite('overriding url')
+
+
+
+
+
+			// `ignorePopstate` property
+
+			// test('`ignorePopstate` value is false by default', function() {
+			// 	expect(element.ignorePopstate).to.be.false;
+			// });
+
+			// test('`ignorePopstate` value changes when `ignore-popstate` changes to true', function() {
+			// 	element.set('ignorePopstate', false);
+			// 	var updateIgnorePopstate = function() {
+			// 		element.setAttribute('ignore-popstate', true);
+			// 	}
+			// 	expect(updateIgnorePopstate).to.change(element, 'ignorePopstate');
+			// });
+
+			// test('`ignorePopstate` value changes when `ignore-popstate` is removed', function() {
+			// 	element.setAttribute('ignore-popstate', true);
+			// 	var updateIgnorePopstate = function() {
+			// 		element.removeAttribute('ignore-popstate');
+			// 	}
+			// 	expect(updateIgnorePopstate).to.change(element, 'ignorePopstate');
+			// });
+
+			// `ignoreHash` property
+
+			// test('`ignoreHash` value is false by default', function() {
+			// 	expect(element.ignoreHash).to.be.false;
+			// });
+
+			// test('`ignoreHash` value changes when `ignore-hash` attr changes', function() {
+			// 	element.set('ignoreHash', false);
+			// 	var updateIgnoreHash = function() {
+			// 		element.setAttribute('ignore-hash', true);
+			// 	}
+			// 	expect(updateIgnoreHash).to.change(element, 'ignoreHash');
+			// });
+
+			// test('`ignoreHash` value changes when `ignore-hash` attr is removed', function() {
+			// 	element.setAttribute('ignore-hash', true);
+			// 	var updateIgnoreHash = function() {
+			// 		element.removeAttribute('ignore-hash');
+			// 	}
+			// 	expect(updateIgnoreHash).to.change(element, 'ignoreHash');
+			// });
+
+			// `ignoreClicks` property
+
+			// test('`ignoreClicks` value is false by default', function() {
+			// 	expect(element.ignoreClicks).to.be.false;
+			// });
+
+			// test('`ignoreClicks` value changes when `ignore-clicks` attr changes', function() {
+			// 	element.set('ignoreClicks', false);
+			// 	var updateIgnoreClicks = function() {
+			// 		element.setAttribute('ignore-clicks', true);
+			// 	}
+			// 	expect(updateIgnoreClicks).to.change(element, 'ignoreClicks');
+			// });
+
+			// test('`ignoreClicks` value changes when `ignore-clicks` attr is removed', function() {
+			// 	element.setAttribute('ignore-clicks', true);
+			// 	var updateIgnoreClicks = function() {
+			// 		element.removeAttribute('ignore-clicks');
+			// 	}
+			// 	expect(updateIgnoreClicks).to.change(element, 'ignoreClicks');
+			// });
+
+			// `urlOverride` property
+
+			// test('`urlOverride` value is an empty string by default', function() {
+			// 	expect(element.urlOverride)
+			// 		.to.be.a('string').and
+			// 		.to.be.empty;
+			// });
+			// 
+			// test('`urlOverride` value changes when `url-override` attr changes', function() {
+			// 	element.set('urlOverride', '');
+			// 	var updateUrlOverride = function() {
+			// 		element.setAttribute('url-override', 'http://www.google.com');
+			// 	}
+			// 	expect(updateUrlOverride).to.change(element, 'urlOverride');
+			// });
+			// 
+			// test('`urlOverride` value changes when `url-override` attr is removed', function() {
+			// 	element.setAttribute('url-override', 'http://www.google.com');
+			// 	var updateUrlOverride = function() {
+			// 		element.removeAttribute('url-override');
+			// 	}
+			// 	expect(updateUrlOverride).to.change(element, 'urlOverride');
+			// });
+			// 
+			// test('propertyModel$ should emit an elements `properties` object', function() {
+			// 	var s$ = element._createStreamFromPropertiesObj(element);
+			// 	var e = '-e'
+			// 	source$.subscribe(function(e) {
+			// 		expect(e).to.equal('no arguments');
+			// 	}, function(err) {
+			// 		done(new Error('should not be called'));
+			// 	}, function() {
+			// 		done();
+			// 	});
+			// });
+
+
+
+			// test('propertyChangedEvents$ should emit `({propery}-changed)` event whenever a property changes', function() {
+			// 	
+			// 	var source$ = element._createStreamFromPropertyChanges(element);
+			// 
+			// 	var expected = 'e-e-e-e'
+			// 	propertyChanges$.subscribe(function(e) {
+			// 		expect(e).to.equal('no arguments');
+			// 	}, function(err) {
+			// 		done(new Error('should not be called'));
+			// 	}, function() {
+			// 		done();
+			// 	});
+			// });
+
+
+
+			// test('observePopstates$ should emit `observeState` value only when true');
+
+			// });
 			// 	test('lifecycle$ property exists', function() {
 			// 		expect(element.lifecycle$).to.be.an.instanceof(Rx.ReplaySubject);
 			// 	});

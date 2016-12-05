@@ -22,15 +22,14 @@ watches address bar for changes
 
 <dom-module id="epic-location">
 	<template>
-		<!-- <iron-query-params id="ironQueryParams"
+		<iron-query-params id="ironQueryParams"
 			params-string="[[query]]"
 			params-object="{{_queryParams}}">
 		</iron-query-params>
 		<app-route-converter id="appRouteConverter"
 			path="[[pathname]]"
-			query-params="[[queryParams]]"
-			route="{{_route}}">
-		</app-route-converter> -->
+			query-params="[[_queryParams]]">
+		</app-route-converter>
 	</template>
 	<script>
 		Polymer({
@@ -52,108 +51,100 @@ watches address bar for changes
 					value: false,
 					notify: true
 				},
-				urlOverride: {
+				url: {
 					type: String,
 					value: '',
 					notify: true
 				},
 				hostname: {
 					type: String,
-					value: '',
+					notify: true,
+					readOnly: true
+				},
+				query: {
+					type: String,
+					notify: true,
+					readOnly: true
+				},
+				pathname: {
+					type: String,
+					notify: true,
+					readOnly: true
+				},
+				route: {
+					type: Object,
 					notify: true,
 					readOnly: true
 				}
-				// lifecycle$: {
-				// 	type: Object,
-				// 	value: function() {
-				// 		return new Rx.ReplaySubject();
-				// 	},
-				// 	notify: true,
-				// 	readOnly: true
-				// },
-				// readyLifecycle$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createReadyLifecycleStream(lifecycle$)',
-				// 	readOnly: true
-				// },
-				// attachedLifecycle$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createAttachedLifecycleStream(lifecycle$)',
-				// 	readOnly: true
-				// },
-				// detachedLifecycle$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createDetachedLifecycleStream(lifecycle$)',
-				// 	readOnly: true
-				// },
-				// observePopstates$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createObservePopstatesStream(readyLifecycle$)',
-				// 	readOnly: true
-				// },
-				// observeHashChanges$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createObserveHashChanges(readyLifecycle$)',
-				// 	readOnly: true
-				// },
-				// observeClicks$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createObserveClicks(readyLifecycle$)',
-				// 	readOnly: true
-				// },
-				// popstates$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createPopstateStream(attachedLifecycle$, observePopstates$)',
-				// 	readOnly: true
-				// },
-				// hashChanges$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createHashChangeStream(attachedLifecycle$, observeHashChanges$)',
-				// 	readOnly: true
-				// },
-				// clicks$: {
-				// 	type: Object,
-				// 	notify: true,
-				// 	computed: '_createClickStream(attachedLifecycle$, observeClicks$)',
-				// 	readOnly: true
-				// },
 			},
 			ready: function() {
-				// var properties$ = this._createStreamFromProperies();
-				var lifecycle$ = this._createStreamFromLifecycleChanges();
-				var attached$ = lifecycle$.filter(v => v === 'attached');
-				var detached$ = lifecycle$.filter(v => v === 'detached');
-				var url$ = xs.of(window.location.href)
-				var urlObj$ = url$.map(href => new URI(href));
-				var hostname$ = urlObj$.map(url => url.hostname());
+				// Streams of lifecycle changes
+				var lifecycleChanges$ = this._createStreamFromLifecycleChanges()
+					.remember();
+				var attached$ = lifecycleChanges$.filter(v => v === 'attached').remember();
+				var detached$ = lifecycleChanges$.filter(v => v === 'detached').remember();
+
+				// streams of property changes
+				var urlChanges$ = xs.fromEvent(this, 'url-changed')
+					.map(e => e.detail.value)
+					.startWith(this.url)
+					.map(url => url || window.location.href)
+					.remember();
+				// streams to process changes
+				var urlObj$ = urlChanges$.map(href => new URI(href));
+				// streams of properties to update
+				var hostname$ = urlObj$
+					.map(url => url.hostname());
+				var query$ = urlObj$.map(url => url.query());
+				var pathname$ = urlObj$.map(url => url.pathname());
 				var domain$ = urlObj$.map(url => url.domain());
 
+				// Child property changes
+				var route$ = xs.fromEvent(this.$.appRouteConverter, 'route-changed')
+					.map(e => e.detail.value)
+					.startWith(this.$.appRouteConverter.route)
+					.remember();
+
 				var state$ = attached$.map(v => xs
-						.combine(hostname$)
-						.map(([hostname]) => Object.assign({}, {
-							hostname
+						.combine(hostname$, query$, pathname$, route$)
+						.map(([hostname, query, pathname, route]) => Object.assign({}, {
+							hostname,
+							query,
+							pathname,
+							route: route
 						}))
-						.debug(x => x)
 						.endWhen(detached$))
-					.compose(xs.flattenConcurrently);
+					.compose(xs.flattenConcurrently)
+					.compose(xs.debounce(100));
 
 				var updateHostname$ = state$
 					.map(state => state.hostname)
 					.compose(xs.dropRepeats());
 				updateHostname$.addListener({
 					next: v => this._setHostname(v),
-					error: err => console.error(err),
-					complete: () => console.log('completed')
-				})
-
+					error: err => console.error(err)
+				});
+				var updateQuery$ = state$
+					.map(state => state.query)
+					.compose(xs.dropRepeats());
+				updateQuery$.addListener({
+					next: v => this._setQuery(v),
+					error: err => console.error(err)
+				});
+				var updatePathname$ = state$
+					.map(state => state.pathname)
+					.compose(xs.dropRepeats());
+				updatePathname$.addListener({
+					next: v => this._setPathname(v),
+					error: err => console.error(err)
+				});
+				var updateRoute$ = state$
+					.map(state => state.route)
+					.compose(xs.dropRepeats());
+				updateRoute$.addListener({
+					next: v => this._setRoute(v),
+					error: err => console.error(err)
+				});
 			},
 			attached: function() {
 

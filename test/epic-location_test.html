@@ -13,7 +13,7 @@
 		<link rel="import"
 			href="../epic-location.es6.html">
 		<link rel="import"
-			href="../../epic-observable/rx.html">
+			href="../../epic-stream/src/xstream.html">
 	</head>
 
 	<body>
@@ -42,9 +42,82 @@
 					expect(element.is).to.be.equal('epic-location');
 				});
 
-				test('default hostname matches current location hostname', function() {
-					expect(element.hostname).to.be.equal(window.location.hostname)
+				test('default hostname matches current location hostname', function(done) {
+					var timer = xs.periodic(100).take(1);
+					timer.addListener({
+						next: v => {
+							try {
+								expect(element.hostname).to.be.equal(window.location.hostname);
+								done()
+							} catch (e) {
+								done(e);
+							}
+						},
+						// error: err => console.error(err),
+						// complete: () => done()
+					});
+
 				});
+
+				test('`hostname` is overriden by `override`', function(done) {
+					var source = 'https://github.com/staltz/xstream';
+					var expected = 'github.com';
+					element.set('url', source);
+
+					var timer = xs.periodic(100).take(1);
+					timer.addListener({
+						next: v => {
+							try {
+								expect(element.hostname).to.be.equal(expected);
+								done()
+							} catch (e) {
+								done(e);
+							}
+						},
+						// error: err => console.error(err),
+						// complete: () => done()
+					});
+				});
+
+				test('element has correct default `route` value', function(done) {
+
+					var timer = xs.periodic(500).take(1);
+					timer.addListener({
+						next: v => {
+							try {
+								expect(element).to.have.property('route');
+								expect(element.route).to.have.property('path', window.location.pathname);
+								done()
+							} catch (e) {
+								done(e);
+							}
+						},
+						// error: err => done(err),
+						// complete: () => done()
+					});
+				});
+
+				test('element has correct override `route` value', function(done) {
+					var source = 'https://github.com/staltz/xstream';
+					var expected = '/staltz/xstream';
+					element.set('url', source);
+					var timer = xs.periodic(500).take(1);
+					timer.addListener({
+						next: v => {
+							try {
+								expect(element).to.have.property('route');
+								expect(element.route).to.have.property('path', expected);
+								done()
+							} catch (e) {
+								done(e);
+							}
+						},
+						// error: err => done(err),
+						// complete: () => done()
+					});
+				});
+
+
 			});
 
 			// read the initial/current url location
@@ -67,194 +140,6 @@
 			// suite('Watching for location Changes')
 			// suite('ignoring changes')
 			// suite('overriding url')
-
-
-
-
-
-			// `ignorePopstate` property
-
-			// test('`ignorePopstate` value is false by default', function() {
-			// 	expect(element.ignorePopstate).to.be.false;
-			// });
-
-			// test('`ignorePopstate` value changes when `ignore-popstate` changes to true', function() {
-			// 	element.set('ignorePopstate', false);
-			// 	var updateIgnorePopstate = function() {
-			// 		element.setAttribute('ignore-popstate', true);
-			// 	}
-			// 	expect(updateIgnorePopstate).to.change(element, 'ignorePopstate');
-			// });
-
-			// test('`ignorePopstate` value changes when `ignore-popstate` is removed', function() {
-			// 	element.setAttribute('ignore-popstate', true);
-			// 	var updateIgnorePopstate = function() {
-			// 		element.removeAttribute('ignore-popstate');
-			// 	}
-			// 	expect(updateIgnorePopstate).to.change(element, 'ignorePopstate');
-			// });
-
-			// `ignoreHash` property
-
-			// test('`ignoreHash` value is false by default', function() {
-			// 	expect(element.ignoreHash).to.be.false;
-			// });
-
-			// test('`ignoreHash` value changes when `ignore-hash` attr changes', function() {
-			// 	element.set('ignoreHash', false);
-			// 	var updateIgnoreHash = function() {
-			// 		element.setAttribute('ignore-hash', true);
-			// 	}
-			// 	expect(updateIgnoreHash).to.change(element, 'ignoreHash');
-			// });
-
-			// test('`ignoreHash` value changes when `ignore-hash` attr is removed', function() {
-			// 	element.setAttribute('ignore-hash', true);
-			// 	var updateIgnoreHash = function() {
-			// 		element.removeAttribute('ignore-hash');
-			// 	}
-			// 	expect(updateIgnoreHash).to.change(element, 'ignoreHash');
-			// });
-
-			// `ignoreClicks` property
-
-			// test('`ignoreClicks` value is false by default', function() {
-			// 	expect(element.ignoreClicks).to.be.false;
-			// });
-
-			// test('`ignoreClicks` value changes when `ignore-clicks` attr changes', function() {
-			// 	element.set('ignoreClicks', false);
-			// 	var updateIgnoreClicks = function() {
-			// 		element.setAttribute('ignore-clicks', true);
-			// 	}
-			// 	expect(updateIgnoreClicks).to.change(element, 'ignoreClicks');
-			// });
-
-			// test('`ignoreClicks` value changes when `ignore-clicks` attr is removed', function() {
-			// 	element.setAttribute('ignore-clicks', true);
-			// 	var updateIgnoreClicks = function() {
-			// 		element.removeAttribute('ignore-clicks');
-			// 	}
-			// 	expect(updateIgnoreClicks).to.change(element, 'ignoreClicks');
-			// });
-
-			// `urlOverride` property
-
-			// test('`urlOverride` value is an empty string by default', function() {
-			// 	expect(element.urlOverride)
-			// 		.to.be.a('string').and
-			// 		.to.be.empty;
-			// });
-			// 
-			// test('`urlOverride` value changes when `url-override` attr changes', function() {
-			// 	element.set('urlOverride', '');
-			// 	var updateUrlOverride = function() {
-			// 		element.setAttribute('url-override', 'http://www.google.com');
-			// 	}
-			// 	expect(updateUrlOverride).to.change(element, 'urlOverride');
-			// });
-			// 
-			// test('`urlOverride` value changes when `url-override` attr is removed', function() {
-			// 	element.setAttribute('url-override', 'http://www.google.com');
-			// 	var updateUrlOverride = function() {
-			// 		element.removeAttribute('url-override');
-			// 	}
-			// 	expect(updateUrlOverride).to.change(element, 'urlOverride');
-			// });
-			// 
-			// test('propertyModel$ should emit an elements `properties` object', function() {
-			// 	var s$ = element._createStreamFromPropertiesObj(element);
-			// 	var e = '-e'
-			// 	source$.subscribe(function(e) {
-			// 		expect(e).to.equal('no arguments');
-			// 	}, function(err) {
-			// 		done(new Error('should not be called'));
-			// 	}, function() {
-			// 		done();
-			// 	});
-			// });
-
-
-
-			// test('propertyChangedEvents$ should emit `({propery}-changed)` event whenever a property changes', function() {
-			// 	
-			// 	var source$ = element._createStreamFromPropertyChanges(element);
-			// 
-			// 	var expected = 'e-e-e-e'
-			// 	propertyChanges$.subscribe(function(e) {
-			// 		expect(e).to.equal('no arguments');
-			// 	}, function(err) {
-			// 		done(new Error('should not be called'));
-			// 	}, function() {
-			// 		done();
-			// 	});
-			// });
-
-
-
-			// test('observePopstates$ should emit `observeState` value only when true');
-
-			// });
-			// 	test('lifecycle$ property exists', function() {
-			// 		expect(element.lifecycle$).to.be.an.instanceof(Rx.ReplaySubject);
-			// 	});
-			// 	test('lifecycle$ should emit null as first value', function() {
-			// 		var source$ = Rx.Observable
-			// 			.zip(element.lifecycle$,
-			// 				Rx.Observable.timer(50, 20, scheduler),
-			// 				function(item, i) {
-			// 					return item;
-			// 				})
-			// 			.do(v => console.log(v))
-			// 		scheduler
-			// 			.expectObservable(source$.take(2))
-			// 			.toBe('-----r-(a|)', {
-			// 				r: 'ready',
-			// 				a: 'attached'
-			// 			});
-			// 		scheduler.flush();
-			// 	});
-			// 	test('readyLifecycle$ property exists', function() {
-			// 		expect(element.readyLifecycle$).to.be.an.instanceof(Rx.AnonymousSubject);
-			// 	});
-			// 	test('readyLifecycle$ emits only `ready` values', function() {
-			// 		var source$ = element.readyLifecycle$;
-			// 		console.log(source$);
-			// 		var timer$ = Rx.Observable
-			// 			.zip(source$,
-			// 				Rx.Observable.timer(50, 20, scheduler),
-			// 				function(item, i) {
-			// 					return item;
-			// 				})
-			// 			.do(v => console.log(v))
-			// 		scheduler
-			// 			.expectObservable(timer$)
-			// 			.toBe('-----r--', {
-			// 				r: 'ready'
-			// 			});
-			// 		scheduler.flush();
-			// 	});
-			// 	test('attachedLifecycle$ property exists', function() {
-			// 		expect(element.attachedLifecycle$).to.be.an.instanceof(Rx.AnonymousSubject);
-			// 	});
-			// 	test('attachedLifecycle$ emits only `attached` values', function() {
-			// 		var source$ = element.attachedLifecycle$;
-			// 		console.log(source$);
-			// 		var timer$ = Rx.Observable
-			// 			.zip(source$,
-			// 				Rx.Observable.timer(50, 20, scheduler),
-			// 				function(item, i) {
-			// 					return item;
-			// 				})
-			// 			.do(v => console.log(v))
-			// 		scheduler
-			// 			.expectObservable(timer$)
-			// 			.toBe('-----a--', {
-			// 				a: 'attached'
-			// 			});
-			// 		scheduler.flush();
-			// 	});
-			// });
 		</script>
 	</body>
 

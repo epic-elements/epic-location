@@ -9,8 +9,6 @@
 <link rel="import"
 	href="../iron-location/iron-query-params.html">
 <link rel="import"
-	href="../epic-stream/src/epic-stream-behavior.html">
-<link rel="import"
 	href="../epic-stream/src/xstream.html">
 
 <!--
@@ -34,7 +32,6 @@ watches address bar for changes
 	<script>
 		Polymer({
 			is: 'epic-location',
-			behaviors: [Polymer.Epic.StreamBehavior],
 			properties: {
 				ignorePopstate: {
 					type: Boolean,
@@ -78,12 +75,6 @@ watches address bar for changes
 				}
 			},
 			ready: function() {
-				// Streams of lifecycle changes
-				var lifecycleChanges$ = this._createStreamFromLifecycleChanges()
-					.remember();
-				var attached$ = lifecycleChanges$.filter(v => v === 'attached').remember();
-				var detached$ = lifecycleChanges$.filter(v => v === 'detached').remember();
-
 				// streams of property changes
 				var urlChanges$ = xs.fromEvent(this, 'url-changed')
 					.map(e => e.detail.value)
@@ -105,113 +96,32 @@ watches address bar for changes
 					.startWith(this.$.appRouteConverter.route)
 					.remember();
 
-				var state$ = attached$.map(v => xs
-						.combine(hostname$, query$, pathname$, route$)
-						.map(([hostname, query, pathname, route]) => Object.assign({}, {
-							hostname,
-							query,
-							pathname,
-							route: route
-						}))
-						.endWhen(detached$))
-					.compose(xs.flattenConcurrently)
+				this.state$ = xs
+					.combine(hostname$, query$, pathname$, route$)
+					.map(([hostname, query, pathname, route]) => Object.assign({}, {
+						hostname,
+						query,
+						pathname,
+						route: route
+					}))
 					.compose(xs.debounce(100));
-
-				var updateHostname$ = state$
-					.map(state => state.hostname)
-					.compose(xs.dropRepeats());
-				updateHostname$.addListener({
-					next: v => this._setHostname(v),
-					error: err => console.error(err)
-				});
-				var updateQuery$ = state$
-					.map(state => state.query)
-					.compose(xs.dropRepeats());
-				updateQuery$.addListener({
-					next: v => this._setQuery(v),
-					error: err => console.error(err)
-				});
-				var updatePathname$ = state$
-					.map(state => state.pathname)
-					.compose(xs.dropRepeats());
-				updatePathname$.addListener({
-					next: v => this._setPathname(v),
-					error: err => console.error(err)
-				});
-				var updateRoute$ = state$
-					.map(state => state.route)
-					.compose(xs.dropRepeats());
-				updateRoute$.addListener({
-					next: v => this._setRoute(v),
-					error: err => console.error(err)
-				});
 			},
 			attached: function() {
-
-
-
-				// this.set('observePopstates', true);
-				// this.set('observePopstates', true);
-				// this.set('observePopstates', false);
-				// this.set('observeHashChanges', true);
-				// this.set('observeHashChanges', true);
-				// this.set('observeHashChanges', false);
-				// this.set('observeClicks', true);
-				// this.set('observeClicks', true);
-				// this.set('observeClicks', false);
+				this.mainListener = {
+					next: state => {
+						this._setHostname(state.hostname);
+						this._setQuery(state.query);
+						this._setPathname(state.pathname);
+						this._setRoute(state.route)
+					},
+					error: err => console.error(err),
+					complete: () => console.log('completed')
+				}
+				this.state$.addListener(this.mainListener);
 			},
 			detached: function() {
-				// this.lifecycle$.next('detached');
-			},
-			// _createReadyLifecycleStream: function(lifecycle$) {
-			// 	return lifecycle$
-			// 		.filter(v => v === 'ready')
-			// },
-			// _createAttachedLifecycleStream: function(lifecycle$) {
-			// 	return lifecycle$
-			// 		.filter(v => v === 'attached')
-			// },
-			// _createDetachedLifecycleStream: function(lifecycle$) {
-			// 	return lifecycle$
-			// 		.filter(v => v === 'detached')
-			// },
-			// _createObservePopstatesStream: function(readyLifecycle$) {
-			// 	return this
-			// 		._createPropertyStream('observePopstates')
-			// 		.filter(v => v)
-			// 		.skipUntil(readyLifecycle$);
-			// },
-			// _createObserveHashChangeStream: function(readyLifecycle$) {
-			// 	return this
-			// 		._createPropertyStream('observeHashChanges')
-			// 		.filter(v => v)
-			// 		.skipUntil(readyLifecycle$);
-			// },
-			// _createObserveClickStream: function(readyLifecycle$) {
-			// 	return this
-			// 		._createPropertyStream('observeClicks')
-			// 		.filter(v => v)
-			// 		.skipUntil(readyLifecycle$);
-			// },
-			// _createPopstateStream: function(attachedLifecycle$, observePopstates$) {
-			// 	return observePopstates$
-			// 		.switch(Rx.Observable
-			// 			.fromEvent(window, 'popstate'))
-			// 		.skipUntil(attachedLifecycle$);
-			// },
-			// _createHashChangeStream: function(attachedLifecycle$, observeHashChanges$) {
-			// 	return observePopstates$
-			// 		.switch(Rx.Observable
-			// 			.fromEvent(window, 'hashchange'))
-			// 		.skipUntil(attachedLifecycle$);
-			// },
-			// _createClickStream: function(attachedLifecycle$, observeClicks$) {
-			// 	return observePopstates$
-			// 		.switch(Rx.Observable
-			// 			.fromEvent(document, 'click'))
-			// 		.skipUntil(attachedLifecycle$);
-			// },
-
+				this.state$.removeListener(this.mainListener);
+			}
 		})
 	</script>
 </dom-module>

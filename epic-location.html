@@ -5,11 +5,11 @@
 <link rel="import"
 	href="uri.html">
 <link rel="import"
-	href="../epic-observable/rx.html">
-<link rel="import"
 	href="../app-route/app-route-converter.html">
 <link rel="import"
 	href="../iron-location/iron-query-params.html">
+<link rel="import"
+	href="../epic-stream/src/xstream.html">
 
 <!--
 `epic-location`
@@ -20,275 +20,162 @@ watches address bar for changes
 
 <dom-module id="epic-location">
 	<template>
-		<iron-query-params params-string="[[query]]"
+		<iron-query-params id="ironQueryParams"
+			params-string="[[query]]"
 			params-object="{{_queryParams}}">
 		</iron-query-params>
-		<app-route-converter path="[[pathname]]"
-			query-params="[[queryParams]]"
-			route="{{_route}}">
+		<app-route-converter id="appRouteConverter"
+			path="[[pathname]]"
+			query-params="[[_queryParams]]">
 		</app-route-converter>
 	</template>
 	<script>
 		'use strict';
 
+		var _slicedToArray = function() {
+			function sliceIterator(arr, i) {
+				var _arr = [];
+				var _n = true;
+				var _d = false;
+				var _e = undefined;
+				try {
+					for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+						_arr.push(_s.value);
+						if (i && _arr.length === i) break;
+					}
+				} catch (err) {
+					_d = true;
+					_e = err;
+				} finally {
+					try {
+						if (!_n && _i["return"]) _i["return"]();
+					} finally {
+						if (_d) throw _e;
+					}
+				}
+				return _arr;
+			}
+			return function(arr, i) {
+				if (Array.isArray(arr)) {
+					return arr;
+				} else if (Symbol.iterator in Object(arr)) {
+					return sliceIterator(arr, i);
+				} else {
+					throw new TypeError("Invalid attempt to destructure non-iterable instance");
+				}
+			};
+		}();
+
 		Polymer({
 			is: 'epic-location',
 			properties: {
-				popstateChanges: {
+				ignorePopstate: {
 					type: Boolean,
+					value: false,
 					notify: true
 				},
-				hashChanges: {
+				ignoreHash: {
 					type: Boolean,
+					value: false,
 					notify: true
 				},
-				clicks: {
+				ignoreClicks: {
 					type: Boolean,
+					value: false,
 					notify: true
 				},
 				url: {
 					type: String,
-					notify: true,
-					value: ''
-				},
-				href: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				hash: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				search: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				pathname: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				port: {
-					type: String,
-					notify: true,
-					value: ''
+					value: '',
+					notify: true
 				},
 				hostname: {
 					type: String,
 					notify: true,
-					value: ''
-				},
-				host: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				password: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				username: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				protocol: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				origin: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				userinfo: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				authority: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				domain: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				subdomain: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				tld: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				directory: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				filename: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				segments: {
-					type: Array,
-					notify: true,
-					value: function value() {
-						return [];
-					}
+					readOnly: true
 				},
 				query: {
 					type: String,
 					notify: true,
-					value: ''
+					readOnly: true
 				},
-				fragment: {
+				pathname: {
 					type: String,
 					notify: true,
-					value: ''
-				},
-				resource: {
-					type: String,
-					notify: true,
-					value: ''
-				},
-				queryParams: {
-					type: Object,
-					notify: true,
-					value: function value() {
-						return {};
-					}
+					readOnly: true
 				},
 				route: {
 					type: Object,
 					notify: true,
-					value: function value() {
-						return {};
-					}
+					readOnly: true
 				}
 			},
-			observers: ['_computeQueryParams(_queryParams, _queryParams.*)', '_computedRoute(_route, _route.*)'],
 			ready: function ready() {
-				var _this = this;
-
-				this.href$ = this._createPropertyStream('href').filter(function(v) {
-					return v;
-				}).distinctUntilChanged();
-				this.events$ = this._createEventStream();
-				this.url$ = this.events$.switchMap(function(v) {
-					return _this._createUrlStream().filter(function(v) {
-						return v;
-					}).distinctUntilChanged();
+				// streams of property changes
+				var urlChanges$ = xs.fromEvent(this, 'url-changed').map(function(e) {
+					return e.detail.value;
+				}).startWith(this.url).map(function(url) {
+					return url || window.location.href;
+				}).remember();
+				// streams to process changes
+				var urlObj$ = urlChanges$.map(function(href) {
+					return new URI(href);
 				});
+				// streams of properties to update
+				var hostname$ = urlObj$.map(function(url) {
+					return url.hostname();
+				});
+				var query$ = urlObj$.map(function(url) {
+					return url.query();
+				});
+				var pathname$ = urlObj$.map(function(url) {
+					return url.pathname();
+				});
+				var domain$ = urlObj$.map(function(url) {
+					return url.domain();
+				});
+
+				// Child property changes
+				var route$ = xs.fromEvent(this.$.appRouteConverter, 'route-changed').map(function(e) {
+					return e.detail.value;
+				}).startWith(this.$.appRouteConverter.route).remember();
+
+				this.state$ = xs.combine(hostname$, query$, pathname$, route$).map(function(_ref) {
+					var _ref2 = _slicedToArray(_ref, 4),
+						hostname = _ref2[0],
+						query = _ref2[1],
+						pathname = _ref2[2],
+						route = _ref2[3];
+
+					return Object.assign({}, {
+						hostname: hostname,
+						query: query,
+						pathname: pathname,
+						route: route
+					});
+				}).compose(xs.debounce(100));
 			},
 			attached: function attached() {
-				var _this2 = this;
+				var _this = this;
 
-				this.subscribedHref$ = this.href$.filter(function(v) {
-					return v;
-				}).distinctUntilChanged().subscribe(function(v) {
-					return _this2._setLocation(v);
-				});
-				this.subscribedUrl$ = this.url$.subscribe(function(v) {
-					return _this2.set('href', v);
-				});
+				this.mainListener = {
+					next: function next(state) {
+						_this._setHostname(state.hostname);
+						_this._setQuery(state.query);
+						_this._setPathname(state.pathname);
+						_this._setRoute(state.route);
+					},
+					error: function error(err) {
+						return console.error(err);
+					},
+					complete: function complete() {
+						return console.log('completed');
+					}
+				};
+				this.state$.addListener(this.mainListener);
 			},
 			detached: function detached() {
-				this.subscribedUrl$.unsubscribe();
-				this.subscribedHref$.unsubscribe();
-			},
-			_computeQueryParams: function _computeQueryParams(_queryParams, change) {
-				this.set(change.path.replace("_", ''), change.value);
-			},
-			_computedRoute: function _computedRoute(_route, change) {
-				this.set(change.path.replace("_", ''), change.value);
-			},
-			_setLocation: function _setLocation(href) {
-				this.debounce('setLocation', function() {
-					var uri = new URI(href);
-					this.set('hash', uri.hash());
-					this.set('search', uri.search());
-					this.set('pathname', uri.pathname());
-					this.set('port', uri.port());
-					this.set('hostname', uri.hostname());
-					this.set('host', uri.host());
-					this.set('password', uri.password());
-					this.set('username', uri.username());
-					this.set('protocol', uri.protocol());
-					this.set('origin', uri.origin());
-					this.set('userinfo', uri.userinfo());
-					this.set('authority', uri.authority());
-					this.set('domain', uri.domain());
-					this.set('subdomain', uri.subdomain());
-					this.set('tld', uri.tld());
-					this.set('directory', uri.directory());
-					this.set('filename', uri.filename());
-					this.set('segments', uri.segment());
-					this.set('query', uri.query());
-					this.set('fragment', uri.fragment());
-					this.set('resource', uri.resource());
-				}, 100);
-			},
-			_createUrlStream: function _createUrlStream() {
-				return this._createPropertyStream('url').map(function(url) {
-					if (!url) {
-						return window.location.href;
-					} else {
-						return url;
-					}
-				}).startWith(window.location.href).distinctUntilChanged();
-			},
-			_createEventStream: function _createEventStream() {
-				var popstateChanges$ = this._createPropertyStream('popstateChanges').switchMap(function(v) {
-					if (v) {
-						return Rx.Observable.fromEvent(window, 'popstate');
-					} else {
-						return false;
-					}
-				}).filter(function(v) {
-					return v;
-				});
-				var hashChanges$ = this._createPropertyStream('hashChanges').switchMap(function(v) {
-					if (v) {
-						return Rx.Observable.fromEvent(window, 'hashchange');
-					} else {
-						return false;
-					}
-				}).filter(function(v) {
-					return v;
-				});
-				var clicks$ = this._createPropertyStream('clicks').switchMap(function(v) {
-					if (v) {
-						return Rx.Observable.fromEvent(document, 'click');
-					} else {
-						return false;
-					}
-				}).filter(function(v) {
-					return v;
-				});
-
-				return Rx.Observable.merge(popstateChanges$, hashChanges$, clicks$).startWith('').distinctUntilChanged();
-			},
-			_createPropertyStream: function _createPropertyStream(property) {
-				var currentProperty$ = Rx.Observable.of(this[property]);
-				var lpropertyChangeEvent$ = Rx.Observable.fromEvent(this, this._camel2dashed(property) + '-changed').map(function(e) {
-					return e.detail.value;
-				});
-				return Rx.Observable.merge(currentProperty$, lpropertyChangeEvent$).distinctUntilChanged();
-			},
-			_camel2dashed: function _camel2dashed(text) {
-				return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+				this.state$.removeListener(this.mainListener);
 			}
 		});
 	</script>

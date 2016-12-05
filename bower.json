@@ -10,7 +10,8 @@
     "epic-observable": "epic-elements/epic-observable",
     "epic-polyfills": "epic-elements/epic-polyfills",
     "app-route": "PolymerElements/app-route#~0.9.3",
-    "iron-location": "polymerelements/iron-location#~0.8.9"
+    "iron-location": "polymerelements/iron-location#~0.8.9",
+    "epic-stream": "epic-elements/epic-stream"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

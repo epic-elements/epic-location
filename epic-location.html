@@ -10,173 +10,148 @@
 	href="../iron-location/iron-query-params.html">
 <link rel="import"
 	href="../epic-stream/src/xstream.html">
-
 <!--
 `epic-location`
 watches address bar for changes
 
 @demo demo/index.html
 -->
-
 <dom-module id="epic-location">
 	<template>
-		<iron-query-params id="ironQueryParams"
-			params-string="[[query]]"
-			params-object="{{_queryParams}}">
-		</iron-query-params>
+		<iron-query-params id="ironQueryParams"></iron-query-params>
 		<app-route-converter id="appRouteConverter"
 			path="[[pathname]]"
-			query-params="[[_queryParams]]">
-		</app-route-converter>
+			query-params="[[_queryParams]]"></app-route-converter>
 	</template>
 	<script>
 		'use strict';
 
-		var _slicedToArray = function() {
-			function sliceIterator(arr, i) {
-				var _arr = [];
-				var _n = true;
-				var _d = false;
-				var _e = undefined;
-				try {
-					for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-						_arr.push(_s.value);
-						if (i && _arr.length === i) break;
-					}
-				} catch (err) {
-					_d = true;
-					_e = err;
-				} finally {
-					try {
-						if (!_n && _i["return"]) _i["return"]();
-					} finally {
-						if (_d) throw _e;
-					}
-				}
-				return _arr;
-			}
-			return function(arr, i) {
-				if (Array.isArray(arr)) {
-					return arr;
-				} else if (Symbol.iterator in Object(arr)) {
-					return sliceIterator(arr, i);
-				} else {
-					throw new TypeError("Invalid attempt to destructure non-iterable instance");
-				}
-			};
-		}();
+Polymer({
+	is: 'epic-location',
+	properties: {
+		_lifecycle: {
+			type: String,
+			notify: true,
+			readOnly: true
+		},
+		url: {
+			type: String,
+			value: '',
+			notify: true
+		},
+		hostname: {
+			type: String,
+			notify: true,
+			readOnly: true
+		},
+		query: {
+			type: String,
+			notify: true,
+			readOnly: true
+		},
+		pathname: {
+			type: String,
+			notify: true,
+			readOnly: true
+		},
+		route: {
+			type: Object,
+			notify: true,
+			readOnly: true
+		}
+	},
+	propertyChangedStream: function propertyChangedStream(el, propName) {
 
-		Polymer({
-			is: 'epic-location',
-			properties: {
-				ignorePopstate: {
-					type: Boolean,
-					value: false,
-					notify: true
-				},
-				ignoreHash: {
-					type: Boolean,
-					value: false,
-					notify: true
-				},
-				ignoreClicks: {
-					type: Boolean,
-					value: false,
-					notify: true
-				},
-				url: {
-					type: String,
-					value: '',
-					notify: true
-				},
-				hostname: {
-					type: String,
-					notify: true,
-					readOnly: true
-				},
-				query: {
-					type: String,
-					notify: true,
-					readOnly: true
-				},
-				pathname: {
-					type: String,
-					notify: true,
-					readOnly: true
-				},
-				route: {
-					type: Object,
-					notify: true,
-					readOnly: true
-				}
-			},
-			ready: function ready() {
-				// streams of property changes
-				var urlChanges$ = xs.fromEvent(this, 'url-changed').map(function(e) {
-					return e.detail.value;
-				}).startWith(this.url).map(function(url) {
-					return url || window.location.href;
-				}).remember();
-				// streams to process changes
-				var urlObj$ = urlChanges$.map(function(href) {
-					return new URI(href);
-				});
-				// streams of properties to update
-				var hostname$ = urlObj$.map(function(url) {
-					return url.hostname();
-				});
-				var query$ = urlObj$.map(function(url) {
-					return url.query();
-				});
-				var pathname$ = urlObj$.map(function(url) {
-					return url.pathname();
-				});
-				var domain$ = urlObj$.map(function(url) {
-					return url.domain();
-				});
+		var attribute = propName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+		var propChanged$ = xs.fromEvent(el, attribute + '-changed').map(function (event) {
+			return event.detail.value;
+		}).startWith(el[propName]).compose(xs.dropRepeats()).filter(function (v) {
+			return v;
+		}).remember();
+		return propChanged$;
+	},
+	ready: function ready() {
+		var _this = this;
 
-				// Child property changes
-				var route$ = xs.fromEvent(this.$.appRouteConverter, 'route-changed').map(function(e) {
-					return e.detail.value;
-				}).startWith(this.$.appRouteConverter.route).remember();
+		// this element
+		var root$ = xs.of(this);
 
-				this.state$ = xs.combine(hostname$, query$, pathname$, route$).map(function(_ref) {
-					var _ref2 = _slicedToArray(_ref, 4),
-						hostname = _ref2[0],
-						query = _ref2[1],
-						pathname = _ref2[2],
-						route = _ref2[3];
-
-					return Object.assign({}, {
-						hostname: hostname,
-						query: query,
-						pathname: pathname,
-						route: route
-					});
-				}).compose(xs.debounce(100));
-			},
-			attached: function attached() {
-				var _this = this;
-
-				this.mainListener = {
-					next: function next(state) {
-						_this._setHostname(state.hostname);
-						_this._setQuery(state.query);
-						_this._setPathname(state.pathname);
-						_this._setRoute(state.route);
-					},
-					error: function error(err) {
-						return console.error(err);
-					},
-					complete: function complete() {
-						return console.log('completed');
-					}
-				};
-				this.state$.addListener(this.mainListener);
-			},
-			detached: function detached() {
-				this.state$.removeListener(this.mainListener);
-			}
+		// property changes
+		var lifecycle$ = this.propertyChangedStream(this, '_lifecycle').map(function (lifecycle) {
+			return { lifecycle: lifecycle };
 		});
+
+		var url$ = this.propertyChangedStream(this, 'url');
+		var route$ = this.propertyChangedStream(this.$.appRouteConverter, 'route').map(function (route) {
+			return { route: route };
+		});
+		var paramsObject$ = this.propertyChangedStream(this.$.ironQueryParams, 'paramsObject').map(function (paramsObject) {
+			return { paramsObject: paramsObject };
+		});
+
+		var clickEvent$ = xs.fromEvent(document, 'click');
+		var hashchangeEvent$ = xs.fromEvent(window, 'hashchange');
+		var popstateEvent$ = xs.fromEvent(window, 'popstate');
+
+		var locationChanged$ = xs.merge(clickEvent$, hashchangeEvent$, popstateEvent$).map(function (event) {
+			return window.location.href;
+		}).startWith(window.location.href).compose(xs.dropRepeats());
+
+		var location$ = xs.combine(locationChanged$, url$.startWith('')).map(function (v) {
+			return v[1] || v[0];
+		}).map(function (v) {
+			return new URI(v);
+		}).remember();
+
+		var hostname$ = location$.map(function (v) {
+			return v.hostname();
+		}).map(function (hostname) {
+			return { hostname: hostname };
+		});
+		var pathname$ = location$.map(function (v) {
+			return v.pathname();
+		}).map(function (pathname) {
+			return { pathname: pathname };
+		});
+		var query$ = location$.map(function (v) {
+			return v.query();
+		}).map(function (query) {
+			return { query: query };
+		});
+
+		var state$ = xs.merge(lifecycle$, hostname$, route$, hostname$, pathname$, query$, paramsObject$).fold(function (x, y) {
+			return Object.assign({}, x, y);
+		}, {}).remember();
+
+		var attached$ = state$.filter(function (v) {
+			return v.lifecycle === 'attached';
+		});
+		var detatched$ = state$.filter(function (v) {
+			return v.lifecycle === 'detached';
+		});
+
+		var listener = {
+			next: function next(x) {
+				_this._setHostname(x.hostname);
+				_this._setPathname(x.pathname);
+				_this._setQuery(x.query);
+				_this._setRoute(x.route);
+				_this.$.ironQueryParams.set('paramsString', x.query);
+				_this.$.appRouteConverter.set('queryParams', x.paramsObject);
+				_this.$.appRouteConverter.set('path', x.pathname);
+			}
+		};
+
+		attached$.addListener(listener);
+
+		this._set_lifecycle('ready');
+	},
+	attached: function attached() {
+		this._set_lifecycle('attached');
+	},
+	detached: function detached() {
+		this._set_lifecycle('detached');
+	}
+});
 	</script>
 </dom-module>

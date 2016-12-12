@@ -17,6 +17,13 @@
 	</head>
 
 	<body>
+	<script>
+            HTMLImports.whenReady(function () {
+              Polymer({
+                is: 'main-document-element'
+              });
+            });
+          </script>
 
 		<test-fixture id="basic">
 			<template>
@@ -25,112 +32,28 @@
 		</test-fixture>
 
 		<script>
-			/**
-			 * Story: element binds to current route
-			 *
-			 * As an element
-			 */
-
 			'use strict';
 
-			suite('<epic-location>', function() {
-				var element;
+suite('<epic-location>', function () {
+	var element;
 
-				setup(function() {
-					element = fixture('basic');
-				});
+	setup(function () {
+		element = fixture('basic');
+	});
 
-				test('instantiating the element works', function() {
-					expect(element.is).to.be.equal('epic-location');
-				});
+	test('instantiating the element works', function () {
+		expect(element.is).to.be.equal('epic-location');
+	});
 
-				test('default hostname matches current location hostname', function(done) {
-					var timer = xs.periodic(100).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element.hostname).to.be.equal(window.location.hostname);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
+	test('hostname should match window.location.hostname', function () {
+		expect(element.hostname).to.be.equal(window.location.hostname);
+	});
 
-				test('`hostname` is overriden by `override`', function(done) {
-					var source = 'https://github.com/staltz/xstream';
-					var expected = 'github.com';
-					element.set('url', source);
-
-					var timer = xs.periodic(100).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element.hostname).to.be.equal(expected);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
-
-				test('element has correct default `route` value', function(done) {
-
-					var timer = xs.periodic(500).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element).to.have.property('route');
-								expect(element.route).to.have.property('path', window.location.pathname);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
-
-				test('element has correct override `route` value', function(done) {
-					var source = 'https://github.com/staltz/xstream';
-					var expected = '/staltz/xstream';
-					element.set('url', source);
-					var timer = xs.periodic(500).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element).to.have.property('route');
-								expect(element.route).to.have.property('path', expected);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
-			});
-
-			// read the initial/current url location
-			// watches for url location changes
-			// current location can be overridden
-
-			// creates url object from location
-			// updates url object when location changes
-			// overrides url object if an override url is provided
-
-			// creates a route object compatible with app-route from location
-			// updates route object when url changes
-			// overrides route object if an override url is provided
-
-
-
-
-
-			// suite('Watching for location Changes')
-			// suite('Watching for location Changes')
-			// suite('ignoring changes')
-			// suite('overriding url')
+	test('hostname should match the hostname for url override', function () {
+		element.set('url', 'http://www.google.com/');
+		expect(element.hostname).to.be.equal('www.google.com');
+	});
+});
 		</script>
 	</body>
 

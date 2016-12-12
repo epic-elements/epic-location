@@ -10,43 +10,27 @@
 	href="../iron-location/iron-query-params.html">
 <link rel="import"
 	href="../epic-stream/src/xstream.html">
-
 <!--
 `epic-location`
 watches address bar for changes
 
 @demo demo/index.html
 -->
-
 <dom-module id="epic-location">
 	<template>
-		<iron-query-params id="ironQueryParams"
-			params-string="[[query]]"
-			params-object="{{_queryParams}}">
-		</iron-query-params>
+		<iron-query-params id="ironQueryParams"></iron-query-params>
 		<app-route-converter id="appRouteConverter"
 			path="[[pathname]]"
-			query-params="[[_queryParams]]">
-		</app-route-converter>
+			query-params="[[_queryParams]]"></app-route-converter>
 	</template>
 	<script>
 		Polymer({
 			is: 'epic-location',
 			properties: {
-				ignorePopstate: {
-					type: Boolean,
-					value: false,
-					notify: true
-				},
-				ignoreHash: {
-					type: Boolean,
-					value: false,
-					notify: true
-				},
-				ignoreClicks: {
-					type: Boolean,
-					value: false,
-					notify: true
+				_lifecycle: {
+					type: String,
+					notify: true,
+					readOnly: true	
 				},
 				url: {
 					type: String,
@@ -74,53 +58,105 @@ watches address bar for changes
 					readOnly: true
 				}
 			},
+			propertyChangedStream: function(el, propName){
+
+				let attribute = propName
+					.replace(/([a-z])([A-Z])/g, '$1-$2')
+					.toLowerCase();
+				const propChanged$ = xs
+						.fromEvent(el,`${attribute}-changed`)
+						.map(event => event.detail.value)
+						.startWith(el[propName])
+						.compose(xs.dropRepeats())
+						.filter(v=>v)
+					.remember();
+					return propChanged$;
+
+			},
 			ready: function() {
-				// streams of property changes
-				var urlChanges$ = xs.fromEvent(this, 'url-changed')
-					.map(e => e.detail.value)
-					.startWith(this.url)
-					.map(url => url || window.location.href)
-					.remember();
-				// streams to process changes
-				var urlObj$ = urlChanges$.map(href => new URI(href));
-				// streams of properties to update
-				var hostname$ = urlObj$
-					.map(url => url.hostname());
-				var query$ = urlObj$.map(url => url.query());
-				var pathname$ = urlObj$.map(url => url.pathname());
-				var domain$ = urlObj$.map(url => url.domain());
+				
+				// this element
+				const root$ = xs.of(this);
 
-				// Child property changes
-				var route$ = xs.fromEvent(this.$.appRouteConverter, 'route-changed')
-					.map(e => e.detail.value)
-					.startWith(this.$.appRouteConverter.route)
+				// property changes
+				const lifecycle$ = this.propertyChangedStream(this, '_lifecycle')
+					.map(lifecycle=>({lifecycle}));
+
+				const url$ = this.propertyChangedStream(this, 'url');
+				const route$ = this.propertyChangedStream(this.$.appRouteConverter, 'route')
+					.map(route=>({route}));
+				const paramsObject$ = this.propertyChangedStream(this.$.ironQueryParams, 'paramsObject')
+					.map(paramsObject=>({paramsObject}));
+
+				const clickEvent$ = xs.fromEvent(document, 'click'); 	
+				const hashchangeEvent$ = xs.fromEvent(window, 'hashchange');  
+				const popstateEvent$ = xs.fromEvent(window, 'popstate');
+
+				const locationChanged$ = xs.merge(
+						clickEvent$,
+						hashchangeEvent$,
+						popstateEvent$)
+					.map(event => window.location.href)
+					.startWith(window.location.href)
+					.compose(xs.dropRepeats());
+				
+				const location$ = xs
+					.combine(
+						locationChanged$,
+						url$.startWith(''))
+					.map(v=>v[1] || v[0])
+					.map(v => new URI(v))
 					.remember();
 
-				this.state$ = xs
-					.combine(hostname$, query$, pathname$, route$)
-					.map(([hostname, query, pathname, route]) => Object.assign({}, {
-						hostname,
-						query,
-						pathname,
-						route: route
-					}))
-					.compose(xs.debounce(100));
+				const hostname$ = location$.map(v=>v.hostname())
+					.map(hostname=>({hostname}));
+				const pathname$ = location$.map(v=>v.pathname())
+					.map(pathname=>({pathname}));
+				const query$ = location$.map(v=>v.query())
+					.map(query=>({query}));
+
+				const state$ = xs
+					.merge(
+						lifecycle$,
+						hostname$,
+						route$,
+						hostname$,
+						pathname$,
+						query$,
+						paramsObject$)
+					.fold((x,y)=>Object.assign({}, x, y),{})
+					.remember();
+				
+
+				const attached$ = state$.filter(v=>v.lifecycle === 'attached');
+				const detatched$ = state$.filter(v=>v.lifecycle === 'detached');
+
+				
+
+				
+				const listener = {
+					next: x => {
+						this._setHostname(x.hostname);
+						this._setPathname(x.pathname);
+						this._setQuery(x.query);
+						this._setRoute(x.route);
+						this.$.ironQueryParams.set('paramsString', x.query);
+						this.$.appRouteConverter.set('queryParams', x.paramsObject);
+						this.$.appRouteConverter.set('path', x.pathname);
+					}
+				}
+
+				attached$.addListener(listener);
+
+
+
+				this._set_lifecycle('ready');
 			},
 			attached: function() {
-				this.mainListener = {
-					next: state => {
-						this._setHostname(state.hostname);
-						this._setQuery(state.query);
-						this._setPathname(state.pathname);
-						this._setRoute(state.route)
-					},
-					error: err => console.error(err),
-					complete: () => console.log('completed')
-				}
-				this.state$.addListener(this.mainListener);
+				this._set_lifecycle('attached');
 			},
 			detached: function() {
-				this.state$.removeListener(this.mainListener);
+				this._set_lifecycle('detached');
 			}
 		})
 	</script>

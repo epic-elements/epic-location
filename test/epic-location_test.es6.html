@@ -17,6 +17,13 @@
 	</head>
 
 	<body>
+	<script>
+            HTMLImports.whenReady(function () {
+              Polymer({
+                is: 'main-document-element'
+              });
+            });
+          </script>
 
 		<test-fixture id="basic">
 			<template>
@@ -44,72 +51,97 @@
 					expect(element.is).to.be.equal('epic-location');
 				});
 
-				test('default hostname matches current location hostname', function(done) {
-					var timer = xs.periodic(100).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element.hostname).to.be.equal(window.location.hostname);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
+				test('propertyConfigStream() should emit initial property values', (){
 
-				test('`hostname` is overriden by `override`', function(done) {
-					var source = 'https://github.com/staltz/xstream';
-					var expected = 'github.com';
-					element.set('url', source);
-
-					var timer = xs.periodic(100).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element.hostname).to.be.equal(expected);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
-
-				test('element has correct default `route` value', function(done) {
-
-					var timer = xs.periodic(500).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element).to.have.property('route');
-								expect(element.route).to.have.property('path', window.location.pathname);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
-
-				test('element has correct override `route` value', function(done) {
-					var source = 'https://github.com/staltz/xstream';
-					var expected = '/staltz/xstream';
-					element.set('url', source);
-					var timer = xs.periodic(500).take(1);
-					timer.addListener({
-						next: function next(v) {
-							try {
-								expect(element).to.have.property('route');
-								expect(element.route).to.have.property('path', expected);
-								done();
-							} catch (e) {
-								done(e);
-							}
-						}
-					});
-				});
+				})
+// 				test('behaviorsStream() should emit initial property values')
+// 				test('createBehaviorPropertiesStream() should emit initial property values')
 			});
+
+// 				test('createBehaviorPropertiesStream() should emit initial property values', function(done) {
+// 					var
+
+// 					var timer = xs.periodic(100).take(1);
+// 					timer.addListener({
+// 						next: function next(v) {
+// 							try {
+// 								expect(element.hostname).to.be.equal(window.location.hostname);
+// 								done();
+// 							} catch (e) {
+// 								done(e);
+// 							}
+// 						}
+// 					});
+// 				});
+
+// 				test('proprtiesStream() should emit initial property values', function(done) {
+// 					var
+
+// 					var timer = xs.periodic(100).take(1);
+// 					timer.addListener({
+// 						next: function next(v) {
+// 							try {
+// 								expect(element.hostname).to.be.equal(window.location.hostname);
+// 								done();
+// 							} catch (e) {
+// 								done(e);
+// 							}
+// 						}
+// 					});
+// 				});
+
+// 				test('`hostname` is overriden by `override`', function(done) {
+// 					var source = 'https://github.com/staltz/xstream';
+// 					var expected = 'github.com';
+// 					element.set('url', source);
+
+// 					var timer = xs.periodic(100).take(1);
+// 					timer.addListener({
+// 						next: function next(v) {
+// 							try {
+// 								expect(element.hostname).to.be.equal(expected);
+// 								done();
+// 							} catch (e) {
+// 								done(e);
+// 							}
+// 						}
+// 					});
+// 				});
+
+// 				test('element has correct default `route` value', function(done) {
+
+// 					var timer = xs.periodic(500).take(1);
+// 					timer.addListener({
+// 						next: function next(v) {
+// 							try {
+// 								expect(element).to.have.property('route');
+// 								expect(element.route).to.have.property('path', window.location.pathname);
+// 								done();
+// 							} catch (e) {
+// 								done(e);
+// 							}
+// 						}
+// 					});
+// 				});
+
+// 				test('element has correct override `route` value', function(done) {
+// 					var source = 'https://github.com/staltz/xstream';
+// 					var expected = '/staltz/xstream';
+// 					element.set('url', source);
+// 					var timer = xs.periodic(500).take(1);
+// 					timer.addListener({
+// 						next: function next(v) {
+// 							try {
+// 								expect(element).to.have.property('route');
+// 								expect(element.route).to.have.property('path', expected);
+// 								done();
+// 							} catch (e) {
+// 								done(e);
+// 							}
+// 						}
+// 					});
+// 				});
+// 			});
 
 			// read the initial/current url location
 			// watches for url location changes
